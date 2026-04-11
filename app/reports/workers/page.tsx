@@ -124,12 +124,21 @@ export default function WorkerReportPage() {
           ))}
         </div>
 
+        <style>{`
+          .worker-table { display: block; }
+          .worker-cards { display: none; }
+          @media (max-width: 640px) {
+            .worker-table { display: none; }
+            .worker-cards { display: flex; flex-direction: column; gap: 10px; }
+          }
+        `}</style>
+
         {filtered.length === 0 ? (
           <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>データがありません</div>
         ) : (
           <>
             {/* PCテーブル */}
-            <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto', marginBottom: 12 }}>
+            <div className="worker-table" style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto', marginBottom: 12 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
@@ -153,12 +162,12 @@ export default function WorkerReportPage() {
             </div>
 
             {/* スマホカード */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="worker-cards">
               {filtered.map(r => (
                 <div key={r.workerId + '-sp'} style={{ background: 'white', borderRadius: 12, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
                   <p style={{ fontWeight: 'bold', fontSize: 16, color: '#111827', margin: '0 0 10px' }}>{r.workerName}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
-                    <div><span style={{ color: '#6b7280' }}>作業件数：</span><span style={{ fontWeight: '600' }}>{r.recordCount}件</span></div>
+                    <div><span style={{ color: '#6b7280' }}>作業件数：</span><span style={{ color: '#111827', fontWeight: '600' }}>{r.recordCount}件</span></div>
                     <div><span style={{ color: '#6b7280' }}>発生報酬：</span><span style={{ color: '#2563eb', fontWeight: '600' }}>¥{r.totalAmount.toLocaleString()}</span></div>
                     <div><span style={{ color: '#6b7280' }}>支払済：</span><span style={{ color: '#16a34a', fontWeight: '600' }}>¥{r.totalPayment.toLocaleString()}</span></div>
                   </div>
