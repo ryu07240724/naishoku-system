@@ -54,7 +54,31 @@ export default function RecordsPage() {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>📝 作業記録一覧</h1>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => {
+              const header = ['作業日', 'ワーカー', '案件', '個数', '報酬(円)', 'メモ']
+              const rows = filtered.map(r => [
+                r.work_date,
+                r.workers?.name ?? '',
+                r.projects?.name ?? '',
+                r.quantity,
+                r.amount,
+                r.note ?? '',
+              ])
+              const csv = [header, ...rows].map(row => row.join(',')).join('\n')
+              const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = '作業記録.csv'
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            style={{ padding: '0.5rem 1.25rem', backgroundColor: '#16a34a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            ⬇ CSV
+          </button>
           <button
             onClick={() => router.push('/records/new')}
             style={{ padding: '0.5rem 1.25rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
