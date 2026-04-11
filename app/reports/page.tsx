@@ -26,7 +26,7 @@ export default function ReportsPage() {
       if (!user) { router.push('/login'); return }
 
       const [recordsRes, paymentsRes] = await Promise.all([
-        supabase.from('work_records').select('work_date, reward_amount, worker_id'),
+        supabase.from('work_records').select('work_date, amount, worker_id'),
         supabase.from('payments').select('payment_date, amount'),
       ])
 
@@ -43,7 +43,7 @@ export default function ReportsPage() {
           monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
         }
         monthMap[month].recordCount += 1
-        monthMap[month].totalReward += r.reward_amount || 0
+        monthMap[month].totalReward += r.amount || 0
       }
 
       // ワーカー数（月ごとのユニーク数）
