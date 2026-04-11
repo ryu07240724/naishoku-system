@@ -46,7 +46,8 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>📋 案件新規登録</h1>
 
       {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
@@ -118,6 +119,7 @@ export default function NewProjectPage() {
           キャンセル
         </button>
       </div>
+    </div>
     </div>
   )
 }

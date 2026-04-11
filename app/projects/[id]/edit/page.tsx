@@ -82,7 +82,8 @@ export default function EditProjectPage() {
   if (loading) return <p style={{ padding: '2rem' }}>読み込み中...</p>
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>✏️ 案件を編集</h1>
 
       {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
@@ -204,6 +205,7 @@ export default function EditProjectPage() {
           キャンセル
         </button>
       </div>
+    </div>
     </div>
   )
 }

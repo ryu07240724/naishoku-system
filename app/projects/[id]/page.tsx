@@ -76,7 +76,8 @@ export default function ProjectDetailPage() {
   ]
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>📋 {project.name}</h1>
 
       <div style={{ marginBottom: '1.5rem' }}>
@@ -146,6 +147,7 @@ export default function ProjectDetailPage() {
           一覧に戻る
         </button>
       </div>
+    </div>
     </div>
   )
 }

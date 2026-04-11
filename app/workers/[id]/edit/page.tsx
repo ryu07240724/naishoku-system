@@ -18,31 +18,32 @@ export default function EditWorkerPage() {
     bank_account_holder: '',
     note: '',
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchWorker = async () => {
       const { data, error } = await supabase
         .from('workers')
         .select('*')
         .eq('id', id)
         .single()
-      if (!error && data) {
-        setForm({
-          name: data.name ?? '',
-          phone: data.phone ?? '',
-          email: data.email ?? '',
-          address: data.address ?? '',
-          bank_name: data.bank_name ?? '',
-          bank_branch: data.bank_branch ?? '',
-          bank_account_number: data.bank_account_number ?? '',
-          bank_account_holder: data.bank_account_holder ?? '',
-          note: data.note ?? '',
-        })
-      }
+      if (error || !data) { setLoading(false); return }
+      setForm({
+        name: data.name ?? '',
+        phone: data.phone ?? '',
+        email: data.email ?? '',
+        address: data.address ?? '',
+        bank_name: data.bank_name ?? '',
+        bank_branch: data.bank_branch ?? '',
+        bank_account_number: data.bank_account_number ?? '',
+        bank_account_holder: data.bank_account_holder ?? '',
+        note: data.note ?? '',
+      })
+      setLoading(false)
     }
-    fetch()
+    fetchWorker()
   }, [id])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -54,14 +55,11 @@ export default function EditWorkerPage() {
       setError('名前は必須です')
       return
     }
-    setLoading(true)
-    const { error } = await supabase
-      .from('workers')
-      .update(form)
-      .eq('id', id)
+    setSaving(true)
+    const { error } = await supabase.from('workers').update(form).eq('id', id)
     if (error) {
       setError('更新に失敗しました: ' + error.message)
-      setLoading(false)
+      setSaving(false)
       return
     }
     router.push(`/workers/${id}`)
@@ -79,8 +77,11 @@ export default function EditWorkerPage() {
     { label: 'メモ', name: 'note', type: 'textarea' },
   ]
 
+  if (loading) return <p style={{ padding: '2rem' }}>読み込み中...</p>
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>👷 ワーカー編集</h1>
 
       {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
@@ -113,10 +114,10 @@ export default function EditWorkerPage() {
       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
         <button
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={saving}
           style={{ padding: '0.6rem 1.5rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '1rem' }}
         >
-          {loading ? '更新中...' : '更新する'}
+          {saving ? '保存中...' : '保存する'}
         </button>
         <button
           onClick={() => router.push(`/workers/${id}`)}
@@ -125,6 +126,7 @@ export default function EditWorkerPage() {
           キャンセル
         </button>
       </div>
+    </div>
     </div>
   )
 }

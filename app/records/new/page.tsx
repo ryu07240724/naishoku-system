@@ -73,7 +73,8 @@ export default function NewRecordPage() {
   const amount = unitPrice * Number(form.quantity || 0)
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>📝 作業記録追加</h1>
 
       {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
@@ -169,6 +170,7 @@ export default function NewRecordPage() {
           キャンセル
         </button>
       </div>
+    </div>
     </div>
   )
 }
