@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [workerCount, setWorkerCount] = useState(0)
   const [projectCount, setProjectCount] = useState(0)
   const [monthlyAmount, setMonthlyAmount] = useState(0)
+  const [unpaidBalance, setUnpaidBalance] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,15 +29,23 @@ export default function DashboardPage() {
         { count: wCount },
         { count: pCount },
         { data: records },
+        { data: allRecords },
+        { data: allPayments },
       ] = await Promise.all([
         supabase.from('workers').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('work_records').select('amount').gte('work_date', firstDay).lte('work_date', lastDay),
+        supabase.from('work_records').select('amount'),
+        supabase.from('payments').select('amount'),
       ])
+
+      const totalReward = allRecords?.reduce((sum, r) => sum + (r.amount ?? 0), 0) ?? 0
+      const totalPayment = allPayments?.reduce((sum, p) => sum + (p.amount ?? 0), 0) ?? 0
 
       setWorkerCount(wCount ?? 0)
       setProjectCount(pCount ?? 0)
       setMonthlyAmount(records?.reduce((sum, r) => sum + (r.amount ?? 0), 0) ?? 0)
+      setUnpaidBalance(totalReward - totalPayment)
       setLoading(false)
     }
     checkAndFetch()
@@ -79,6 +88,10 @@ export default function DashboardPage() {
             <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
               <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>今月の支払い総額</p>
               <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#9333ea', margin: '0.5rem 0 0' }}>¥{monthlyAmount.toLocaleString()}</p>
+            </div>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem', borderLeft: unpaidBalance > 0 ? '4px solid #ef4444' : '4px solid #6b7280' }}>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>未払残高（全期間）</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: unpaidBalance > 0 ? '#ef4444' : '#6b7280', margin: '0.5rem 0 0' }}>¥{unpaidBalance.toLocaleString()}</p>
             </div>
           </div>
         )}
