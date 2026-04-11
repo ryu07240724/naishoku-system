@@ -74,6 +74,12 @@ export default function PaymentDetailPage() {
 
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         <button
+          onClick={() => router.push(`/payments/${id}/edit`)}
+          style={{ padding: '0.6rem 1.25rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+        >
+          編集
+        </button>
+        <button
           onClick={handleDelete}
           style={{ padding: '0.6rem 1.25rem', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
         >
