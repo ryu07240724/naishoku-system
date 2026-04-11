@@ -101,12 +101,20 @@ export default function WorkerReportPage() {
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
 
         {/* ヘッダー */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              onClick={() => router.push('/reports')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, color: '#6b7280' }}
+            >←</button>
+            <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>👷 ワーカー別集計</h1>
+          </div>
           <button
-            onClick={() => router.push('/reports')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, color: '#6b7280' }}
-          >←</button>
-          <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>👷 ワーカー別集計</h1>
+            onClick={() => router.push('/dashboard')}
+            style={{ padding: '8px 16px', background: '#6b7280', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+          >
+            ダッシュボードへ
+          </button>
         </div>
 
         {/* 期間指定 */}
