@@ -19,6 +19,14 @@ export default function WorkersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkWidth = () => setIsMobile(window.innerWidth < 768)
+    checkWidth()
+    window.addEventListener('resize', checkWidth)
+    return () => window.removeEventListener('resize', checkWidth)
+  }, [])
 
   useEffect(() => {
     const checkAndFetch = async () => {
@@ -44,9 +52,17 @@ export default function WorkersPage() {
   })
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
+    <div style={{
+      padding: '2rem',
+      fontFamily: 'sans-serif',
+      backgroundColor: 'white',
+      minHeight: '100vh',
+      color: '#111827',
+      maxWidth: isMobile ? '100%' : '1200px',
+      margin: '0 auto',
+    }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>👷 ワーカー一覧</h1>
+        <h1 style={{ fontSize: isMobile ? '1.2rem' : '1.5rem', fontWeight: 'bold' }}>👷 ワーカー一覧</h1>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button
             onClick={() => router.push('/workers/new')}
@@ -70,7 +86,14 @@ export default function WorkersPage() {
           placeholder="名前で検索..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827', minWidth: '200px' }}
+          style={{
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '1rem',
+            color: '#111827',
+            minWidth: isMobile ? '100%' : '200px',
+          }}
         />
         <select
           value={statusFilter}
@@ -95,7 +118,36 @@ export default function WorkersPage() {
         <p>読み込み中...</p>
       ) : filtered.length === 0 ? (
         <p style={{ color: '#6b7280' }}>該当するワーカーがいません。</p>
+      ) : isMobile ? (
+        // スマホ：カード表示
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {filtered.map((w) => (
+            <div key={w.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{w.name}</span>
+                <span style={{
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '999px',
+                  fontSize: '0.8rem',
+                  backgroundColor: w.status === 'active' ? '#d1fae5' : '#f3f4f6',
+                  color: w.status === 'active' ? '#065f46' : '#6b7280',
+                }}>
+                  {w.status === 'active' ? '稼働中' : '停止中'}
+                </span>
+              </div>
+              <p style={{ margin: '0.2rem 0', fontSize: '0.9rem', color: '#6b7280' }}>📞 {w.phone ?? '—'}</p>
+              <p style={{ margin: '0.2rem 0', fontSize: '0.9rem', color: '#6b7280' }}>✉️ {w.email ?? '—'}</p>
+              <button
+                onClick={() => router.push(`/workers/${w.id}`)}
+                style={{ marginTop: '0.75rem', width: '100%', padding: '0.4rem', backgroundColor: '#e5e7eb', color: '#111827', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                詳細
+              </button>
+            </div>
+          ))}
+        </div>
       ) : (
+        // PC：テーブル表示
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#f3f4f6', textAlign: 'left' }}>
@@ -118,7 +170,7 @@ export default function WorkersPage() {
                     borderRadius: '999px',
                     fontSize: '0.8rem',
                     backgroundColor: w.status === 'active' ? '#d1fae5' : '#f3f4f6',
-                    color: w.status === 'active' ? '#065f46' : '#6b7280'
+                    color: w.status === 'active' ? '#065f46' : '#6b7280',
                   }}>
                     {w.status === 'active' ? '稼働中' : '停止中'}
                   </span>
