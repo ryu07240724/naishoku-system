@@ -17,6 +17,8 @@ export default function WorkersPage() {
   const router = useRouter()
   const [workers, setWorkers] = useState<Worker[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     const checkAndFetch = async () => {
@@ -34,6 +36,12 @@ export default function WorkersPage() {
     }
     checkAndFetch()
   }, [router])
+
+  const filtered = workers.filter((w) => {
+    const matchName = w.name.includes(search)
+    const matchStatus = statusFilter === 'all' || w.status === statusFilter
+    return matchName && matchStatus
+  })
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
@@ -55,10 +63,38 @@ export default function WorkersPage() {
         </div>
       </div>
 
+      {/* 検索・絞り込み */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="名前で検索..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827', minWidth: '200px' }}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827' }}
+        >
+          <option value="all">すべての状態</option>
+          <option value="active">稼働中</option>
+          <option value="inactive">停止中</option>
+        </select>
+        {(search || statusFilter !== 'all') && (
+          <button
+            onClick={() => { setSearch(''); setStatusFilter('all') }}
+            style={{ padding: '0.5rem 1rem', backgroundColor: '#f3f4f6', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            リセット
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <p>読み込み中...</p>
-      ) : workers.length === 0 ? (
-        <p style={{ color: '#6b7280' }}>ワーカーがまだ登録されていません。</p>
+      ) : filtered.length === 0 ? (
+        <p style={{ color: '#6b7280' }}>該当するワーカーがいません。</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -71,7 +107,7 @@ export default function WorkersPage() {
             </tr>
           </thead>
           <tbody>
-            {workers.map((w) => (
+            {filtered.map((w) => (
               <tr key={w.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                 <td style={{ padding: '0.75rem' }}>{w.name}</td>
                 <td style={{ padding: '0.75rem' }}>{w.phone ?? '—'}</td>

@@ -18,6 +18,9 @@ export default function RecordsPage() {
   const router = useRouter()
   const [records, setRecords] = useState<Record[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   useEffect(() => {
     const checkAndFetch = async () => {
@@ -36,7 +39,16 @@ export default function RecordsPage() {
     checkAndFetch()
   }, [router])
 
-  const totalAmount = records.reduce((sum, r) => sum + (r.amount ?? 0), 0)
+  const filtered = records.filter((r) => {
+    const matchSearch =
+      (r.workers?.name ?? '').includes(search) ||
+      (r.projects?.name ?? '').includes(search)
+    const matchFrom = dateFrom ? r.work_date >= dateFrom : true
+    const matchTo = dateTo ? r.work_date <= dateTo : true
+    return matchSearch && matchFrom && matchTo
+  })
+
+  const totalAmount = filtered.reduce((sum, r) => sum + (r.amount ?? 0), 0)
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
@@ -58,15 +70,47 @@ export default function RecordsPage() {
         </div>
       </div>
 
+      {/* 検索・絞り込み */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="ワーカー名・案件名で検索..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827', minWidth: '200px' }}
+        />
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827' }}
+        />
+        <span style={{ color: '#6b7280' }}>〜</span>
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827' }}
+        />
+        {(search || dateFrom || dateTo) && (
+          <button
+            onClick={() => { setSearch(''); setDateFrom(''); setDateTo('') }}
+            style={{ padding: '0.5rem 1rem', backgroundColor: '#f3f4f6', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            リセット
+          </button>
+        )}
+      </div>
+
       <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem' }}>
-        <p style={{ margin: 0, fontSize: '0.9rem', color: '#166534' }}>合計支払額</p>
+        <p style={{ margin: 0, fontSize: '0.9rem', color: '#166534' }}>合計支払額（絞り込み後）</p>
         <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#166534' }}>¥{totalAmount.toLocaleString()}</p>
       </div>
 
       {loading ? (
         <p>読み込み中...</p>
-      ) : records.length === 0 ? (
-        <p style={{ color: '#6b7280' }}>作業記録がまだありません。</p>
+      ) : filtered.length === 0 ? (
+        <p style={{ color: '#6b7280' }}>該当する作業記録がありません。</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -80,7 +124,7 @@ export default function RecordsPage() {
             </tr>
           </thead>
           <tbody>
-            {records.map((r) => (
+            {filtered.map((r) => (
               <tr key={r.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                 <td style={{ padding: '0.75rem' }}>{r.work_date}</td>
                 <td style={{ padding: '0.75rem' }}>{r.workers?.name ?? '—'}</td>

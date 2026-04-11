@@ -16,6 +16,9 @@ export default function PaymentsPage() {
   const router = useRouter()
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   useEffect(() => {
     const checkAndFetch = async () => {
@@ -34,7 +37,14 @@ export default function PaymentsPage() {
     checkAndFetch()
   }, [router])
 
-  const totalAmount = payments.reduce((sum, p) => sum + (p.amount ?? 0), 0)
+  const filtered = payments.filter((p) => {
+    const matchSearch = (p.workers?.name ?? '').includes(search)
+    const matchFrom = dateFrom ? p.payment_date >= dateFrom : true
+    const matchTo = dateTo ? p.payment_date <= dateTo : true
+    return matchSearch && matchFrom && matchTo
+  })
+
+  const totalAmount = filtered.reduce((sum, p) => sum + (p.amount ?? 0), 0)
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', backgroundColor: 'white', minHeight: '100vh', color: '#111827' }}>
@@ -56,15 +66,47 @@ export default function PaymentsPage() {
         </div>
       </div>
 
+      {/* 検索・絞り込み */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="ワーカー名で検索..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827', minWidth: '200px' }}
+        />
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827' }}
+        />
+        <span style={{ color: '#6b7280' }}>〜</span>
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          style={{ padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '1rem', color: '#111827' }}
+        />
+        {(search || dateFrom || dateTo) && (
+          <button
+            onClick={() => { setSearch(''); setDateFrom(''); setDateTo('') }}
+            style={{ padding: '0.5rem 1rem', backgroundColor: '#f3f4f6', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            リセット
+          </button>
+        )}
+      </div>
+
       <div style={{ backgroundColor: '#fef9c3', border: '1px solid #fde047', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem' }}>
-        <p style={{ margin: 0, fontSize: '0.9rem', color: '#854d0e' }}>支払い総額</p>
+        <p style={{ margin: 0, fontSize: '0.9rem', color: '#854d0e' }}>支払い総額（絞り込み後）</p>
         <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#854d0e' }}>¥{totalAmount.toLocaleString()}</p>
       </div>
 
       {loading ? (
         <p>読み込み中...</p>
-      ) : payments.length === 0 ? (
-        <p style={{ color: '#6b7280' }}>支払い記録がまだありません。</p>
+      ) : filtered.length === 0 ? (
+        <p style={{ color: '#6b7280' }}>該当する支払い記録がありません。</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -77,7 +119,7 @@ export default function PaymentsPage() {
             </tr>
           </thead>
           <tbody>
-            {payments.map((p) => (
+            {filtered.map((p) => (
               <tr key={p.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                 <td style={{ padding: '0.75rem' }}>{p.payment_date}</td>
                 <td style={{ padding: '0.75rem' }}>{p.workers?.name ?? '—'}</td>
