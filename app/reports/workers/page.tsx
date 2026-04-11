@@ -15,10 +15,10 @@ type WorkerRow = {
 
 function getDefaultRange() {
   const now = new Date()
-  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const from = new Date(now.getFullYear(), now.getMonth(), 1)
   const to = new Date(now.getFullYear(), now.getMonth() + 1, 0)
   return {
-    from: from.toISOString().slice(0, 7) + '-01',
+    from: from.toISOString().slice(0, 10),
     to: to.toISOString().slice(0, 10),
   }
 }
