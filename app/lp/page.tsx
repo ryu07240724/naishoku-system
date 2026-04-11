@@ -104,11 +104,7 @@ export default function LpPage() {
               現在の管理方法や課題をお聞きして、<br />導入のご提案をいたします。お気軽にどうぞ。
             </p>
             
-              href="mailto:ryu07240724@yahoo.co.jp"
-              style={{ display: 'inline-block', padding: '12px 32px', background: '#185FA5', color: 'white', borderRadius: 12, fontSize: 15, fontWeight: '500', textDecoration: 'none' }}
-            >
-              メールで問い合わせる
-            </a>
+              <a href="mailto:ryu07240724@yahoo.co.jp" style={{ display: 'inline-block', padding: '12px 32px', background: '#185FA5', color: 'white', borderRadius: 12, fontSize: 15, fontWeight: '500', textDecoration: 'none' }}>メールで問い合わせる</a>
           </div>
         </div>
 
