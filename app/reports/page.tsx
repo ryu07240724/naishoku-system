@@ -33,11 +33,10 @@ export default function ReportsPage() {
       const records = recordsRes.data || []
       const payments = paymentsRes.data || []
 
-      // 月ごとに集計
       const monthMap: Record<string, MonthlyRow> = {}
 
       for (const r of records) {
-        const month = r.work_date?.slice(0, 7) // "YYYY-MM"
+        const month = r.work_date?.slice(0, 7)
         if (!month) continue
         if (!monthMap[month]) {
           monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
@@ -46,7 +45,6 @@ export default function ReportsPage() {
         monthMap[month].totalReward += r.amount || 0
       }
 
-      // ワーカー数（月ごとのユニーク数）
       const workersByMonth: Record<string, Set<string>> = {}
       for (const r of records) {
         const month = r.work_date?.slice(0, 7)
@@ -54,7 +52,6 @@ export default function ReportsPage() {
         if (!workersByMonth[month]) workersByMonth[month] = new Set()
         workersByMonth[month].add(r.worker_id)
       }
-
       for (const month of Object.keys(monthMap)) {
         monthMap[month].workerCount = workersByMonth[month]?.size || 0
       }
@@ -68,19 +65,15 @@ export default function ReportsPage() {
         monthMap[month].totalPayment += p.amount || 0
       }
 
-      // 残高計算
       for (const row of Object.values(monthMap)) {
         row.balance = row.totalReward - row.totalPayment
       }
 
-      // 新しい月順にソート
       const sorted = Object.values(monthMap).sort((a, b) => b.month.localeCompare(a.month))
       setRows(sorted)
 
-      // 年リスト
       const yearSet = new Set(sorted.map(r => r.month.slice(0, 4)))
       setYears(Array.from(yearSet).sort((a, b) => b.localeCompare(a)))
-
       setLoading(false)
     }
 
@@ -88,24 +81,15 @@ export default function ReportsPage() {
   }, [router])
 
   const filteredRows = selectedYear === 'all' ? rows : rows.filter(r => r.month.startsWith(selectedYear))
-
   const totalReward = filteredRows.reduce((s, r) => s + r.totalReward, 0)
   const totalPayment = filteredRows.reduce((s, r) => s + r.totalPayment, 0)
   const totalBalance = totalReward - totalPayment
 
   const handleExportCSV = () => {
     const header = ['月', '稼働ワーカー数', '作業件数', '発生報酬合計(円)', '支払合計(円)', '未払残高(円)']
-    const csvRows = filteredRows.map(r => [
-      r.month,
-      r.workerCount,
-      r.recordCount,
-      r.totalReward,
-      r.totalPayment,
-      r.balance,
-    ])
+    const csvRows = filteredRows.map(r => [r.month, r.workerCount, r.recordCount, r.totalReward, r.totalPayment, r.balance])
     const csv = [header, ...csvRows].map(row => row.join(',')).join('\n')
-    const bom = '\uFEFF'
-    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -122,6 +106,15 @@ export default function ReportsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      <style>{`
+        .report-table { display: block; }
+        .report-cards { display: none; }
+        @media (max-width: 640px) {
+          .report-table { display: none; }
+          .report-cards { display: flex; flex-direction: column; gap: 10px; }
+        }
+      `}</style>
+
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
 
         {/* ヘッダー */}
@@ -131,6 +124,22 @@ export default function ReportsPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, color: '#6b7280' }}
           >←</button>
           <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>📊 月別集計・レポート</h1>
+        </div>
+
+        {/* サブメニュー */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => router.push('/reports/workers')}
+            style={{ padding: '8px 16px', background: 'white', border: '2px solid #2563eb', borderRadius: 8, color: '#2563eb', fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+          >
+            👷 ワーカー別集計
+          </button>
+          <button
+            onClick={() => router.push('/reports/projects')}
+            style={{ padding: '8px 16px', background: 'white', border: '2px solid #16a34a', borderRadius: 8, color: '#16a34a', fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+          >
+            📋 案件別集計
+          </button>
         </div>
 
         {/* フィルター＋CSVボタン */}
@@ -143,7 +152,6 @@ export default function ReportsPage() {
             <option value="all">全期間</option>
             {years.map(y => <option key={y} value={y}>{y}年</option>)}
           </select>
-
           <button
             onClick={handleExportCSV}
             style={{ padding: '8px 16px', background: '#16a34a', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
@@ -166,26 +174,19 @@ export default function ReportsPage() {
           ))}
         </div>
 
-        {/* テーブル（PC） */}
-        <div style={{ display: 'none' }} className="pc-table">
-        </div>
-
-        {/* テーブル */}
         {filteredRows.length === 0 ? (
           <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>
             データがありません
           </div>
         ) : (
           <>
-            {/* PC表示 */}
-            <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+            {/* PCテーブル */}
+            <div className="report-table" style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                     {['月', '稼働ワーカー', '作業件数', '発生報酬', '支払済', '未払残高'].map(h => (
-                      <th key={h} style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', color: '#374151', whiteSpace: 'nowrap' }}>
-                        {h === '月' ? <span style={{ textAlign: 'left', display: 'block' }}>{h}</span> : h}
-                      </th>
+                      <th key={h} style={{ padding: '12px 16px', textAlign: h === '月' ? 'left' : 'right', fontWeight: '600', color: '#374151', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -197,23 +198,21 @@ export default function ReportsPage() {
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: '#374151' }}>{r.recordCount}件</td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: '#2563eb', fontWeight: '600' }}>¥{r.totalReward.toLocaleString()}</td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: '#16a34a', fontWeight: '600' }}>¥{r.totalPayment.toLocaleString()}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: r.balance > 0 ? '#dc2626' : '#6b7280' }}>
-                        ¥{r.balance.toLocaleString()}
-                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: r.balance > 0 ? '#dc2626' : '#6b7280' }}>¥{r.balance.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            {/* スマホ：カード表示 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
+            {/* スマホカード */}
+            <div className="report-cards">
               {filteredRows.map(r => (
-                <div key={r.month + '-sp'} style={{ background: 'white', borderRadius: 12, padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+                <div key={r.month + '-sp'} style={{ background: 'white', borderRadius: 12, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
                   <p style={{ fontWeight: 'bold', fontSize: 16, color: '#111827', margin: '0 0 10px' }}>{r.month}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
-                    <div><span style={{ color: '#6b7280' }}>稼働ワーカー：</span><span style={{ fontWeight: '600' }}>{r.workerCount}人</span></div>
-                    <div><span style={{ color: '#6b7280' }}>作業件数：</span><span style={{ fontWeight: '600' }}>{r.recordCount}件</span></div>
+                    <div><span style={{ color: '#6b7280' }}>稼働ワーカー：</span><span style={{ color: '#111827', fontWeight: '600' }}>{r.workerCount}人</span></div>
+                    <div><span style={{ color: '#6b7280' }}>作業件数：</span><span style={{ color: '#111827', fontWeight: '600' }}>{r.recordCount}件</span></div>
                     <div><span style={{ color: '#6b7280' }}>発生報酬：</span><span style={{ color: '#2563eb', fontWeight: '600' }}>¥{r.totalReward.toLocaleString()}</span></div>
                     <div><span style={{ color: '#6b7280' }}>支払済：</span><span style={{ color: '#16a34a', fontWeight: '600' }}>¥{r.totalPayment.toLocaleString()}</span></div>
                   </div>
