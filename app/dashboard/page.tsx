@@ -88,6 +88,7 @@ export default function DashboardPage() {
             { label: '👷 ワーカー管理', path: '/workers', color: '#2563eb' },
             { label: '📋 案件管理', path: '/projects', color: '#16a34a' },
             { label: '📝 作業記録', path: '/records', color: '#9333ea' },
+            { label: '💰 支払い管理', path: '/payments', color: '#d97706' },
           ].map((item) => (
             <button
               key={item.path}
