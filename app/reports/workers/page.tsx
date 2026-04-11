@@ -13,50 +13,63 @@ type WorkerRow = {
   balance: number
 }
 
+function getDefaultRange() {
+  const now = new Date()
+  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  return {
+    from: from.toISOString().slice(0, 7) + '-01',
+    to: to.toISOString().slice(0, 10),
+  }
+}
+
 export default function WorkerReportPage() {
   const router = useRouter()
   const [rows, setRows] = useState<WorkerRow[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const defaults = getDefaultRange()
+  const [dateFrom, setDateFrom] = useState(defaults.from)
+  const [dateTo, setDateTo] = useState(defaults.to)
+
+  const fetchAll = async (from: string, to: string) => {
+    setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const [workersRes, recordsRes, paymentsRes] = await Promise.all([
+      supabase.from('workers').select('id, name'),
+      supabase.from('work_records').select('worker_id, amount').gte('work_date', from).lte('work_date', to),
+      supabase.from('payments').select('worker_id, amount').gte('payment_date', from).lte('payment_date', to),
+    ])
+
+    const workers = workersRes.data || []
+    const records = recordsRes.data || []
+    const payments = paymentsRes.data || []
+
+    const result: WorkerRow[] = workers.map(w => {
+      const wRecords = records.filter(r => r.worker_id === w.id)
+      const wPayments = payments.filter(p => p.worker_id === w.id)
+      const totalAmount = wRecords.reduce((s, r) => s + (r.amount ?? 0), 0)
+      const totalPayment = wPayments.reduce((s, p) => s + (p.amount ?? 0), 0)
+      return {
+        workerId: w.id,
+        workerName: w.name,
+        recordCount: wRecords.length,
+        totalAmount,
+        totalPayment,
+        balance: totalAmount - totalPayment,
+      }
+    })
+
+    result.sort((a, b) => b.balance - a.balance)
+    setRows(result)
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const fetchAll = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-
-      const [workersRes, recordsRes, paymentsRes] = await Promise.all([
-        supabase.from('workers').select('id, name'),
-        supabase.from('work_records').select('worker_id, amount'),
-        supabase.from('payments').select('worker_id, amount'),
-      ])
-
-      const workers = workersRes.data || []
-      const records = recordsRes.data || []
-      const payments = paymentsRes.data || []
-
-      const result: WorkerRow[] = workers.map(w => {
-        const wRecords = records.filter(r => r.worker_id === w.id)
-        const wPayments = payments.filter(p => p.worker_id === w.id)
-        const totalAmount = wRecords.reduce((s, r) => s + (r.amount ?? 0), 0)
-        const totalPayment = wPayments.reduce((s, p) => s + (p.amount ?? 0), 0)
-        return {
-          workerId: w.id,
-          workerName: w.name,
-          recordCount: wRecords.length,
-          totalAmount,
-          totalPayment,
-          balance: totalAmount - totalPayment,
-        }
-      })
-
-      // 未払い残高の多い順にソート
-      result.sort((a, b) => b.balance - a.balance)
-      setRows(result)
-      setLoading(false)
-    }
-
-    fetchAll()
-  }, [router])
+    fetchAll(defaults.from, defaults.to)
+  }, [])
 
   const filtered = rows.filter(r => r.workerName.includes(search))
 
@@ -68,19 +81,22 @@ export default function WorkerReportPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'ワーカー別集計.csv'
+    a.download = `ワーカー別集計_${dateFrom}_${dateTo}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6b7280' }}>読み込み中...</p>
-    </div>
-  )
-
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      <style>{`
+        .worker-table { display: block; }
+        .worker-cards { display: none; }
+        @media (max-width: 640px) {
+          .worker-table { display: none; }
+          .worker-cards { display: flex; flex-direction: column; gap: 10px; }
+        }
+      `}</style>
+
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
 
         {/* ヘッダー */}
@@ -92,6 +108,32 @@ export default function WorkerReportPage() {
           <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>👷 ワーカー別集計</h1>
         </div>
 
+        {/* 期間指定 */}
+        <div style={{ background: 'white', borderRadius: 12, padding: '16px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: 20 }}>
+          <p style={{ fontSize: 13, fontWeight: '600', color: '#374151', margin: '0 0 12px' }}>集計期間</p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827' }}
+            />
+            <span style={{ color: '#6b7280', fontSize: 14 }}>〜</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827' }}
+            />
+            <button
+              onClick={() => fetchAll(dateFrom, dateTo)}
+              style={{ padding: '8px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+            >
+              集計する
+            </button>
+          </div>
+        </div>
+
         {/* 検索＋CSVボタン */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
           <input
@@ -99,7 +141,7 @@ export default function WorkerReportPage() {
             placeholder="ワーカー名で検索"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, minWidth: 180, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14 }}
+            style={{ flex: 1, minWidth: 180, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827' }}
           />
           <button
             onClick={handleExportCSV}
@@ -124,16 +166,9 @@ export default function WorkerReportPage() {
           ))}
         </div>
 
-        <style>{`
-          .worker-table { display: block; }
-          .worker-cards { display: none; }
-          @media (max-width: 640px) {
-            .worker-table { display: none; }
-            .worker-cards { display: flex; flex-direction: column; gap: 10px; }
-          }
-        `}</style>
-
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>読み込み中...</div>
+        ) : filtered.length === 0 ? (
           <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>データがありません</div>
         ) : (
           <>

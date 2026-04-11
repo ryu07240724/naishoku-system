@@ -13,96 +13,98 @@ type MonthlyRow = {
   balance: number
 }
 
+function getDefaultRange() {
+  const now = new Date()
+  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  return {
+    from: from.toISOString().slice(0, 7) + '-01',
+    to: to.toISOString().slice(0, 10),
+  }
+}
+
 export default function ReportsPage() {
   const router = useRouter()
   const [rows, setRows] = useState<MonthlyRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedYear, setSelectedYear] = useState<string>('all')
-  const [years, setYears] = useState<string[]>([])
+  const defaults = getDefaultRange()
+  const [dateFrom, setDateFrom] = useState(defaults.from)
+  const [dateTo, setDateTo] = useState(defaults.to)
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+  const fetchAll = async (from: string, to: string) => {
+    setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
 
-      const [recordsRes, paymentsRes] = await Promise.all([
-        supabase.from('work_records').select('work_date, amount, worker_id'),
-        supabase.from('payments').select('payment_date, amount'),
-      ])
+    const [recordsRes, paymentsRes] = await Promise.all([
+      supabase.from('work_records').select('work_date, amount, worker_id').gte('work_date', from).lte('work_date', to),
+      supabase.from('payments').select('payment_date, amount').gte('payment_date', from).lte('payment_date', to),
+    ])
 
-      const records = recordsRes.data || []
-      const payments = paymentsRes.data || []
+    const records = recordsRes.data || []
+    const payments = paymentsRes.data || []
 
-      const monthMap: Record<string, MonthlyRow> = {}
+    const monthMap: Record<string, MonthlyRow> = {}
 
-      for (const r of records) {
-        const month = r.work_date?.slice(0, 7)
-        if (!month) continue
-        if (!monthMap[month]) {
-          monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
-        }
-        monthMap[month].recordCount += 1
-        monthMap[month].totalReward += r.amount || 0
+    for (const r of records) {
+      const month = r.work_date?.slice(0, 7)
+      if (!month) continue
+      if (!monthMap[month]) {
+        monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
       }
-
-      const workersByMonth: Record<string, Set<string>> = {}
-      for (const r of records) {
-        const month = r.work_date?.slice(0, 7)
-        if (!month || !r.worker_id) continue
-        if (!workersByMonth[month]) workersByMonth[month] = new Set()
-        workersByMonth[month].add(r.worker_id)
-      }
-      for (const month of Object.keys(monthMap)) {
-        monthMap[month].workerCount = workersByMonth[month]?.size || 0
-      }
-
-      for (const p of payments) {
-        const month = p.payment_date?.slice(0, 7)
-        if (!month) continue
-        if (!monthMap[month]) {
-          monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
-        }
-        monthMap[month].totalPayment += p.amount || 0
-      }
-
-      for (const row of Object.values(monthMap)) {
-        row.balance = row.totalReward - row.totalPayment
-      }
-
-      const sorted = Object.values(monthMap).sort((a, b) => b.month.localeCompare(a.month))
-      setRows(sorted)
-
-      const yearSet = new Set(sorted.map(r => r.month.slice(0, 4)))
-      setYears(Array.from(yearSet).sort((a, b) => b.localeCompare(a)))
-      setLoading(false)
+      monthMap[month].recordCount += 1
+      monthMap[month].totalReward += r.amount || 0
     }
 
-    fetchAll()
-  }, [router])
+    const workersByMonth: Record<string, Set<string>> = {}
+    for (const r of records) {
+      const month = r.work_date?.slice(0, 7)
+      if (!month || !r.worker_id) continue
+      if (!workersByMonth[month]) workersByMonth[month] = new Set()
+      workersByMonth[month].add(r.worker_id)
+    }
+    for (const month of Object.keys(monthMap)) {
+      monthMap[month].workerCount = workersByMonth[month]?.size || 0
+    }
 
-  const filteredRows = selectedYear === 'all' ? rows : rows.filter(r => r.month.startsWith(selectedYear))
-  const totalReward = filteredRows.reduce((s, r) => s + r.totalReward, 0)
-  const totalPayment = filteredRows.reduce((s, r) => s + r.totalPayment, 0)
+    for (const p of payments) {
+      const month = p.payment_date?.slice(0, 7)
+      if (!month) continue
+      if (!monthMap[month]) {
+        monthMap[month] = { month, workerCount: 0, recordCount: 0, totalReward: 0, totalPayment: 0, balance: 0 }
+      }
+      monthMap[month].totalPayment += p.amount || 0
+    }
+
+    for (const row of Object.values(monthMap)) {
+      row.balance = row.totalReward - row.totalPayment
+    }
+
+    const sorted = Object.values(monthMap).sort((a, b) => b.month.localeCompare(a.month))
+    setRows(sorted)
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchAll(defaults.from, defaults.to)
+  }, [])
+
+  const totalReward = rows.reduce((s, r) => s + r.totalReward, 0)
+  const totalPayment = rows.reduce((s, r) => s + r.totalPayment, 0)
   const totalBalance = totalReward - totalPayment
 
   const handleExportCSV = () => {
     const header = ['月', '稼働ワーカー数', '作業件数', '発生報酬合計(円)', '支払合計(円)', '未払残高(円)']
-    const csvRows = filteredRows.map(r => [r.month, r.workerCount, r.recordCount, r.totalReward, r.totalPayment, r.balance])
+    const csvRows = rows.map(r => [r.month, r.workerCount, r.recordCount, r.totalReward, r.totalPayment, r.balance])
     const csv = [header, ...csvRows].map(row => row.join(',')).join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `月別集計_${selectedYear === 'all' ? '全期間' : selectedYear}.csv`
+    a.download = `集計レポート_${dateFrom}_${dateTo}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
-
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#6b7280' }}>読み込み中...</p>
-    </div>
-  )
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
@@ -123,7 +125,7 @@ export default function ReportsPage() {
             onClick={() => router.push('/dashboard')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, color: '#6b7280' }}
           >←</button>
-          <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>📊 月別集計・レポート</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 'bold', color: '#111827', margin: 0 }}>📊 集計レポート</h1>
         </div>
 
         {/* サブメニュー */}
@@ -142,22 +144,36 @@ export default function ReportsPage() {
           </button>
         </div>
 
-        {/* フィルター＋CSVボタン */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <select
-            value={selectedYear}
-            onChange={e => setSelectedYear(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827', background: 'white' }}
-          >
-            <option value="all">全期間</option>
-            {years.map(y => <option key={y} value={y}>{y}年</option>)}
-          </select>
-          <button
-            onClick={handleExportCSV}
-            style={{ padding: '8px 16px', background: '#16a34a', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
-          >
-            ⬇ CSVエクスポート
-          </button>
+        {/* 期間指定 */}
+        <div style={{ background: 'white', borderRadius: 12, padding: '16px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: 20 }}>
+          <p style={{ fontSize: 13, fontWeight: '600', color: '#374151', margin: '0 0 12px' }}>集計期間</p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827' }}
+            />
+            <span style={{ color: '#6b7280', fontSize: 14 }}>〜</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, color: '#111827' }}
+            />
+            <button
+              onClick={() => fetchAll(dateFrom, dateTo)}
+              style={{ padding: '8px 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+            >
+              集計する
+            </button>
+            <button
+              onClick={handleExportCSV}
+              style={{ padding: '8px 16px', background: '#16a34a', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+            >
+              ⬇ CSV
+            </button>
+          </div>
         </div>
 
         {/* サマリーカード */}
@@ -174,10 +190,10 @@ export default function ReportsPage() {
           ))}
         </div>
 
-        {filteredRows.length === 0 ? (
-          <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>
-            データがありません
-          </div>
+        {loading ? (
+          <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>読み込み中...</div>
+        ) : rows.length === 0 ? (
+          <div style={{ background: 'white', borderRadius: 12, padding: 40, textAlign: 'center', color: '#6b7280' }}>データがありません</div>
         ) : (
           <>
             {/* PCテーブル */}
@@ -191,7 +207,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredRows.map((r, i) => (
+                  {rows.map((r, i) => (
                     <tr key={r.month} style={{ borderBottom: '1px solid #f3f4f6', background: i % 2 === 0 ? 'white' : '#fafafa' }}>
                       <td style={{ padding: '12px 16px', fontWeight: '600', color: '#111827' }}>{r.month}</td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: '#374151' }}>{r.workerCount}人</td>
@@ -207,7 +223,7 @@ export default function ReportsPage() {
 
             {/* スマホカード */}
             <div className="report-cards">
-              {filteredRows.map(r => (
+              {rows.map(r => (
                 <div key={r.month + '-sp'} style={{ background: 'white', borderRadius: 12, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
                   <p style={{ fontWeight: 'bold', fontSize: 16, color: '#111827', margin: '0 0 10px' }}>{r.month}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
