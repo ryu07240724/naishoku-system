@@ -15,6 +15,7 @@ type Project = {
   start_date: string | null
   end_date: string | null
   note: string | null
+  repeat_group_id: string | null
 }
 
 const statusLabel: { [key: string]: string } = {
@@ -34,18 +35,29 @@ export default function ProjectDetailPage() {
   const { id } = useParams()
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
+  const [relatedCount, setRelatedCount] = useState(0)
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchProject = async () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .eq('id', id)
         .single()
-      if (!error && data) setProject(data)
+      if (!error && data) {
+        setProject(data)
+        // 繰り返しグループの関連件数を取得
+        if (data.repeat_group_id) {
+          const { count } = await supabase
+            .from('projects')
+            .select('*', { count: 'exact', head: true })
+            .eq('repeat_group_id', data.repeat_group_id)
+          setRelatedCount(count ?? 0)
+        }
+      }
       setLoading(false)
     }
-    fetch()
+    fetchProject()
   }, [id])
 
   const handleStatusChange = async (newStatus: string) => {
@@ -58,8 +70,24 @@ export default function ProjectDetailPage() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('この案件を削除しますか？')) return
-    await supabase.from('projects').delete().eq('id', project!.id)
+    if (!project) return
+
+    // 繰り返しグループがある場合は選択肢を出す
+    if (project.repeat_group_id && relatedCount > 1) {
+      const choice = window.confirm(
+        `この案件は繰り返し登録グループの一部です（グループ内 ${relatedCount} 件）。\n\nOK → グループ内の案件をすべて削除\nキャンセル → この1件だけ削除`
+      )
+      if (choice) {
+        // グループごと削除
+        await supabase.from('projects').delete().eq('repeat_group_id', project.repeat_group_id)
+      } else {
+        // 1件だけ削除
+        await supabase.from('projects').delete().eq('id', project.id)
+      }
+    } else {
+      if (!confirm('この案件を削除しますか？')) return
+      await supabase.from('projects').delete().eq('id', project.id)
+    }
     router.push('/projects')
   }
 
@@ -80,7 +108,7 @@ export default function ProjectDetailPage() {
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>📋 {project.name}</h1>
 
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{
           padding: '0.2rem 0.8rem',
           borderRadius: '999px',
@@ -90,6 +118,11 @@ export default function ProjectDetailPage() {
         }}>
           {statusLabel[project.status] ?? project.status}
         </span>
+        {project.repeat_group_id && relatedCount > 1 && (
+          <span style={{ padding: '0.2rem 0.8rem', borderRadius: '999px', fontSize: '0.85rem', backgroundColor: '#ede9fe', color: '#5b21b6' }}>
+            🔁 繰り返しグループ（{relatedCount}件）
+          </span>
+        )}
       </div>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem' }}>
