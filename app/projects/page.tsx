@@ -33,14 +33,12 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
     const checkAndFetch = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/login')
-        return
-      }
+      if (!session) { router.push('/login'); return }
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -50,6 +48,20 @@ export default function ProjectsPage() {
     }
     checkAndFetch()
   }, [router])
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setUpdatingId(id)
+    const { error } = await supabase
+      .from('projects')
+      .update({ status: newStatus })
+      .eq('id', id)
+    if (!error) {
+      setProjects((prev) =>
+        prev.map((p) => p.id === id ? { ...p, status: newStatus } : p)
+      )
+    }
+    setUpdatingId(null)
+  }
 
   const filtered = projects.filter((p) => {
     const matchName = p.name.includes(search) || (p.client_name ?? '').includes(search)
@@ -130,15 +142,27 @@ export default function ProjectsPage() {
                 <td style={{ padding: '0.75rem' }}>¥{p.unit_price.toLocaleString()} / {p.unit ?? '個'}</td>
                 <td style={{ padding: '0.75rem' }}>{p.client_name ?? '—'}</td>
                 <td style={{ padding: '0.75rem' }}>
-                  <span style={{
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '999px',
-                    fontSize: '0.8rem',
-                    backgroundColor: statusColor[p.status]?.bg ?? '#f3f4f6',
-                    color: statusColor[p.status]?.color ?? '#6b7280',
-                  }}>
-                    {statusLabel[p.status] ?? p.status}
-                  </span>
+                  <select
+                    value={p.status}
+                    disabled={updatingId === p.id}
+                    onChange={(e) => handleStatusChange(p.id, e.target.value)}
+                    style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      backgroundColor: statusColor[p.status]?.bg ?? '#f3f4f6',
+                      color: statusColor[p.status]?.color ?? '#6b7280',
+                      borderColor: statusColor[p.status]?.color ?? '#d1d5db',
+                      fontWeight: 'bold',
+                      opacity: updatingId === p.id ? 0.5 : 1,
+                    }}
+                  >
+                    <option value="active">進行中</option>
+                    <option value="completed">完了</option>
+                    <option value="cancelled">キャンセル</option>
+                  </select>
                 </td>
                 <td style={{ padding: '0.75rem' }}>
                   <button
