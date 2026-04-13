@@ -16,6 +16,12 @@ type Worker = {
   bank_account_holder: string | null
   status: string
   note: string | null
+  custom_label_1: string | null
+  custom_value_1: string | null
+  custom_label_2: string | null
+  custom_value_2: string | null
+  custom_label_3: string | null
+  custom_value_3: string | null
 }
 
 export default function WorkerDetailPage() {
@@ -67,6 +73,12 @@ export default function WorkerDetailPage() {
     { label: 'メモ', value: worker.note },
   ]
 
+  const customRows = [
+    { label: worker.custom_label_1 || '未分類項目1', value: worker.custom_value_1 },
+    { label: worker.custom_label_2 || '未分類項目2', value: worker.custom_value_2 },
+    { label: worker.custom_label_3 || '未分類項目3', value: worker.custom_value_3 },
+  ].filter((r) => r.label || r.value)
+
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', fontFamily: 'sans-serif', color: '#111827' }}>
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
@@ -84,7 +96,7 @@ export default function WorkerDetailPage() {
         </span>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
         <tbody>
           {rows.map((r) => (
             <tr key={r.label} style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -94,6 +106,22 @@ export default function WorkerDetailPage() {
           ))}
         </tbody>
       </table>
+
+      {customRows.length > 0 && (
+        <div style={{ marginBottom: '2rem' }}>
+          <p style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#6b7280', marginBottom: '0.5rem' }}>📋 未分類項目</p>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              {customRows.map((r, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                  <td style={{ padding: '0.75rem', fontWeight: 'bold', color: '#6b7280', width: '40%' }}>{r.label}</td>
+                  <td style={{ padding: '0.75rem', color: '#111827' }}>{r.value ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         <button
