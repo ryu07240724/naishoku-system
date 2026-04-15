@@ -145,6 +145,12 @@ export default function ReportsPage() {
           >
             📋 案件別集計
           </button>
+          <button
+            onClick={() => router.push('/reports/slip')}
+            style={{ padding: '8px 16px', background: 'white', border: '2px solid #7c3aed', borderRadius: 8, color: '#7c3aed', fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+          >
+            🧾 支払明細書
+          </button>
         </div>
 
         {/* 期間指定 */}
