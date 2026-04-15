@@ -67,7 +67,7 @@ export default function SlipPage() {
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
 
   return (
-    <>
+    <div style={{minHeight:'100vh', background:'#f9fafb', color:'#111827'}}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -80,18 +80,18 @@ export default function SlipPage() {
       `}</style>
 
       {/* 操作パネル（印刷時非表示） */}
-      <div className="no-print" style={{background:'#f3f4f6', padding:'16px', borderBottom:'1px solid #e5e7eb'}}>
+      <div className="no-print" style={{background:'#f3f4f6', padding:'16px', borderBottom:'1px solid #e5e7eb', color:'#111827'}}>
         <div style={{maxWidth:'800px', margin:'0 auto'}}>
           <div style={{display:'flex', alignItems:'center', gap:'12px', flexWrap:'wrap'}}>
             <Link href="/reports" style={{color:'#6b7280', textDecoration:'none', fontSize:'14px'}}>← レポートへ戻る</Link>
             <span style={{color:'#6b7280'}}>|</span>
-            <span style={{fontWeight:'bold', fontSize:'16px'}}>支払明細書</span>
+            <span style={{fontWeight:'bold', fontSize:'16px', color:'#111827'}}>支払明細書</span>
           </div>
           <div style={{display:'flex', gap:'12px', marginTop:'12px', flexWrap:'wrap', alignItems:'flex-end'}}>
             <div>
               <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>ワーカー</div>
               <select value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px'}}>
+                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}}>
                 <option value="">選択してください</option>
                 {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
@@ -99,14 +99,14 @@ export default function SlipPage() {
             <div>
               <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>年</div>
               <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px'}}>
+                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}}>
                 {years.map(y => <option key={y} value={y}>{y}年</option>)}
               </select>
             </div>
             <div>
               <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>月</div>
               <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px'}}>
+                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}}>
                 {months.map(m => <option key={m} value={m}>{m}月</option>)}
               </select>
             </div>
@@ -114,7 +114,7 @@ export default function SlipPage() {
               style={{padding:'8px 20px', background:'#3b82f6', color:'white', border:'none', borderRadius:'6px', fontSize:'14px', cursor:'pointer'}}>
               {loading ? '読込中...' : '表示'}
             </button>
-            {searched && records.length >= 0 && (
+            {searched && (
               <button onClick={() => window.print()}
                 style={{padding:'8px 20px', background:'#10b981', color:'white', border:'none', borderRadius:'6px', fontSize:'14px', cursor:'pointer'}}>
                 🖨️ 印刷 / PDF保存
@@ -134,14 +134,14 @@ export default function SlipPage() {
           <>
             {/* ヘッダー */}
             <div style={{textAlign:'center', marginBottom:'24px'}}>
-              <h1 style={{fontSize:'22px', fontWeight:'bold', margin:'0 0 4px'}}>支払明細書</h1>
+              <h1 style={{fontSize:'22px', fontWeight:'bold', margin:'0 0 4px', color:'#111827'}}>支払明細書</h1>
               <div style={{color:'#6b7280', fontSize:'14px'}}>{selectedYear}年{selectedMonth}月分</div>
             </div>
 
             {/* 宛名・発行者 */}
             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px'}}>
               <div>
-                <div style={{fontSize:'18px', fontWeight:'bold', borderBottom:'2px solid #111', paddingBottom:'4px', marginBottom:'8px'}}>
+                <div style={{fontSize:'18px', fontWeight:'bold', borderBottom:'2px solid #111', paddingBottom:'4px', marginBottom:'8px', color:'#111827'}}>
                   {workerInfo?.name} 様
                 </div>
                 {workerInfo?.bank_name && (
@@ -156,11 +156,11 @@ export default function SlipPage() {
             </div>
 
             {/* 合計サマリー */}
-            <div style={{background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:'8px', padding:'16px', marginBottom:'24px'}}>
+            <div style={{background:'white', border:'1px solid #e5e7eb', borderRadius:'8px', padding:'16px', marginBottom:'24px'}}>
               <div style={{display:'flex', gap:'32px', flexWrap:'wrap'}}>
                 <div>
                   <div style={{fontSize:'12px', color:'#6b7280'}}>作業報酬合計</div>
-                  <div style={{fontSize:'20px', fontWeight:'bold'}}>¥{totalAmount.toLocaleString()}</div>
+                  <div style={{fontSize:'20px', fontWeight:'bold', color:'#111827'}}>¥{totalAmount.toLocaleString()}</div>
                 </div>
                 <div>
                   <div style={{fontSize:'12px', color:'#6b7280'}}>支払済み合計</div>
@@ -175,33 +175,33 @@ export default function SlipPage() {
 
             {/* 作業明細 */}
             <div style={{marginBottom:'24px'}}>
-              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #3b82f6', paddingLeft:'8px', marginBottom:'12px'}}>作業明細</h2>
+              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #3b82f6', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>作業明細</h2>
               {records.length === 0 ? (
                 <div style={{color:'#9ca3af', fontSize:'14px'}}>該当する作業記録がありません</div>
               ) : (
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
                   <thead>
                     <tr style={{background:'#f3f4f6'}}>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left'}}>日付</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left'}}>案件名</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>数量</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>単価</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>金額</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left', color:'#374151'}}>日付</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left', color:'#374151'}}>案件名</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#374151'}}>数量</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#374151'}}>単価</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#374151'}}>金額</th>
                     </tr>
                   </thead>
                   <tbody>
                     {records.map((r, i) => (
                       <tr key={i} style={{background: i % 2 === 0 ? 'white' : '#f9fafb'}}>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb'}}>{r.work_date}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb'}}>{r.projects?.name || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>{r.quantity?.toLocaleString()}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>¥{r.unit_price?.toLocaleString()}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>¥{r.amount?.toLocaleString()}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.work_date}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.projects?.name || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.quantity?.toLocaleString()}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>¥{r.unit_price?.toLocaleString()}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>¥{r.amount?.toLocaleString()}</td>
                       </tr>
                     ))}
                     <tr style={{background:'#eff6ff', fontWeight:'bold'}}>
-                      <td colSpan={4} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>合計</td>
-                      <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>¥{totalAmount.toLocaleString()}</td>
+                      <td colSpan={4} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>合計</td>
+                      <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>¥{totalAmount.toLocaleString()}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -210,29 +210,29 @@ export default function SlipPage() {
 
             {/* 支払履歴 */}
             <div>
-              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #10b981', paddingLeft:'8px', marginBottom:'12px'}}>支払履歴</h2>
+              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #10b981', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>支払履歴</h2>
               {payments.length === 0 ? (
                 <div style={{color:'#9ca3af', fontSize:'14px'}}>該当する支払記録がありません</div>
               ) : (
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
                   <thead>
                     <tr style={{background:'#f3f4f6'}}>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left'}}>支払日</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left'}}>メモ</th>
-                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>金額</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left', color:'#374151'}}>支払日</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'left', color:'#374151'}}>メモ</th>
+                      <th style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#374151'}}>金額</th>
                     </tr>
                   </thead>
                   <tbody>
                     {payments.map((p, i) => (
                       <tr key={i} style={{background: i % 2 === 0 ? 'white' : '#f9fafb'}}>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb'}}>{p.payment_date}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb'}}>{p.notes || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>¥{p.amount?.toLocaleString()}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{p.payment_date}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{p.notes || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>¥{p.amount?.toLocaleString()}</td>
                       </tr>
                     ))}
                     <tr style={{background:'#f0fdf4', fontWeight:'bold'}}>
-                      <td colSpan={2} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>合計</td>
-                      <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right'}}>¥{totalPaid.toLocaleString()}</td>
+                      <td colSpan={2} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>合計</td>
+                      <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>¥{totalPaid.toLocaleString()}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -241,6 +241,6 @@ export default function SlipPage() {
           </>
         )}
       </div>
-    </>
+    </div>
   )
 }
