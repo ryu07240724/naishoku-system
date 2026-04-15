@@ -61,12 +61,20 @@ export default function DashboardPage() {
       <header style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1f2937' }}>内職管理システム</h1>
-          <button
-            onClick={handleLogout}
-            style={{ fontSize: '0.875rem', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            ログアウト
-          </button>
+          <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+            <button
+              onClick={() => router.push('/settings')}
+              style={{ fontSize: '0.875rem', color: '#6b7280', background: 'none', border: '1px solid #d1d5db', borderRadius:'6px', padding:'6px 12px', cursor: 'pointer' }}
+            >
+              ⚙️ 設定
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ fontSize: '0.875rem', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              ログアウト
+            </button>
+          </div>
         </div>
       </header>
 
