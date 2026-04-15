@@ -19,6 +19,13 @@ export default function SlipPage() {
   const [workerInfo, setWorkerInfo] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    supabase.from('settings').select('*').eq('id', 'main').single().then(({ data }) => {
+      if (data) setSettings(data)
+    })
+  }, [])
 
   useEffect(() => {
     supabase.from('workers').select('*').order('name').then(({ data }) => {
@@ -150,8 +157,13 @@ export default function SlipPage() {
                   </div>
                 )}
               </div>
-              <div style={{textAlign:'right', fontSize:'13px', color:'#374151'}}>
-                <div>発行日：{selectedYear}年{selectedMonth}月末</div>
+              <div style={{textAlign:'right', fontSize:'13px', color:'#374151', lineHeight:'1.8'}}>
+                {settings?.company_name && <div style={{fontWeight:'bold', fontSize:'15px', color:'#111827'}}>{settings.company_name}</div>}
+                {settings?.owner_name && <div>{settings.owner_name}</div>}
+                {settings?.address && <div>{settings.address}</div>}
+                {settings?.phone && <div>TEL：{settings.phone}</div>}
+                {settings?.email && <div>{settings.email}</div>}
+                <div style={{marginTop:'4px'}}>発行日：{selectedYear}年{selectedMonth}月末</div>
               </div>
             </div>
 
