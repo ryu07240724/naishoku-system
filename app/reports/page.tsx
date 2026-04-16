@@ -151,6 +151,12 @@ export default function ReportsPage() {
           >
             🧾 支払明細書
           </button>
+            <button
+            onClick={() => router.push('/reports/work-report')}
+            style={{ padding: '8px 16px', background: 'white', border: '2px solid #ea580c', borderRadius: 8, color: '#ea580c', fontSize: 14, fontWeight: '600', cursor: 'pointer' }}
+          >
+            📝 作業報告書
+          </button>
         </div>
 
         {/* 期間指定 */}
