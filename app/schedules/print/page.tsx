@@ -12,9 +12,11 @@ const supabase = createClient(
 export default function SchedulePrintPage() {
   const [workers, setWorkers] = useState<any[]>([])
   const [selectedWorker, setSelectedWorker] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  const [dateFrom, setDateFrom] = useState(todayStr)
   const [dateTo, setDateTo] = useState('')
-  const [schedules, setSchedules] = useState<any[]>([])
+  const [records, setRecords] = useState<any[]>([])
   const [workerInfo, setWorkerInfo] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -31,22 +33,20 @@ export default function SchedulePrintPage() {
     setLoading(true)
     setSearched(true)
     let query = supabase
-      .from('schedules')
+      .from('work_records')
       .select('*, projects(name)')
       .eq('worker_id', selectedWorker)
-      .order('scheduled_date')
-    if (dateFrom) query = query.gte('scheduled_date', dateFrom)
-    if (dateTo) query = query.lte('scheduled_date', dateTo)
+      .order('work_date')
+    if (dateFrom) query = query.gte('work_date', dateFrom)
+    if (dateTo) query = query.lte('work_date', dateTo)
     const { data } = await query
     const worker = workers.find(w => w.id === selectedWorker)
-    setSchedules(data || [])
+    setRecords(data || [])
     setWorkerInfo(worker || null)
     setLoading(false)
   }
 
-  const today = new Date()
-  const issuedDate = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`
-
+  const issuedDate = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`
   const periodLabel = dateFrom && dateTo
     ? `${dateFrom} 〜 ${dateTo}`
     : dateFrom ? `${dateFrom} 以降`
@@ -122,13 +122,11 @@ export default function SchedulePrintPage() {
           </div>
         ) : (
           <>
-            {/* ヘッダー */}
             <div style={{textAlign:'center', marginBottom:'24px'}}>
               <h1 style={{fontSize:'22px', fontWeight:'bold', margin:'0 0 4px', color:'#111827'}}>作業予定表</h1>
               <div style={{color:'#6b7280', fontSize:'14px'}}>{periodLabel}</div>
             </div>
 
-            {/* 宛名・発行者 */}
             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px'}}>
               <div>
                 <div style={{fontSize:'18px', fontWeight:'bold', borderBottom:'2px solid #111', paddingBottom:'4px', color:'#111827'}}>
@@ -145,28 +143,27 @@ export default function SchedulePrintPage() {
               </div>
             </div>
 
-            {/* 予定一覧テーブル */}
             <div style={{marginBottom:'24px'}}>
-              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #2563eb', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>作業予定一覧</h2>
-              {schedules.length === 0 ? (
+              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #7c3aed', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>作業予定一覧</h2>
+              {records.length === 0 ? (
                 <div style={{color:'#9ca3af', fontSize:'14px'}}>該当する予定がありません</div>
               ) : (
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
                   <thead>
                     <tr style={{background:'#f3f4f6'}}>
-                      {['予定日','案件名','数量','単価','備考'].map(h => (
-                        <th key={h} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign: h === '数量' || h === '単価' ? 'right' : 'left', color:'#374151'}}>{h}</th>
+                      {['予定日','案件名','数量','単価','金額'].map(h => (
+                        <th key={h} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign: h==='予定日'||h==='案件名' ? 'left' : 'right', color:'#374151'}}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {schedules.map((s, i) => (
+                    {records.map((r, i) => (
                       <tr key={i} style={{background: i % 2 === 0 ? 'white' : '#f9fafb'}}>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827', whiteSpace:'nowrap'}}>{s.scheduled_date}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{s.projects?.name || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.quantity != null ? s.quantity.toLocaleString() : '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.unit_price != null ? `¥${s.unit_price.toLocaleString()}` : '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#6b7280'}}>{s.note || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.work_date}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.projects?.name || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.quantity?.toLocaleString() || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.unit_price != null ? `¥${r.unit_price.toLocaleString()}` : '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.amount != null ? `¥${r.amount.toLocaleString()}` : '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -174,7 +171,6 @@ export default function SchedulePrintPage() {
               )}
             </div>
 
-            {/* 備考欄 */}
             <div style={{marginTop:'32px'}}>
               <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #f59e0b', paddingLeft:'8px', marginBottom:'8px', color:'#111827'}}>備考</h2>
               <div style={{border:'1px solid #e5e7eb', borderRadius:'6px', padding:'12px', minHeight:'80px', background:'white', fontSize:'13px', color:'#111827', whiteSpace:'pre-wrap'}}>
