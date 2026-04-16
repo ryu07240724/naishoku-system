@@ -16,7 +16,7 @@ export default function SchedulePrintPage() {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
   const [dateFrom, setDateFrom] = useState(todayStr)
   const [dateTo, setDateTo] = useState('')
-  const [records, setRecords] = useState<any[]>([])
+  const [schedules, setSchedules] = useState<any[]>([])
   const [workerInfo, setWorkerInfo] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -33,15 +33,15 @@ export default function SchedulePrintPage() {
     setLoading(true)
     setSearched(true)
     let query = supabase
-      .from('work_records')
+      .from('schedules')
       .select('*, projects(name)')
       .eq('worker_id', selectedWorker)
-      .order('work_date')
-    if (dateFrom) query = query.gte('work_date', dateFrom)
-    if (dateTo) query = query.lte('work_date', dateTo)
+      .order('scheduled_date')
+    if (dateFrom) query = query.gte('scheduled_date', dateFrom)
+    if (dateTo) query = query.lte('scheduled_date', dateTo)
     const { data } = await query
     const worker = workers.find(w => w.id === selectedWorker)
-    setRecords(data || [])
+    setSchedules(data || [])
     setWorkerInfo(worker || null)
     setLoading(false)
   }
@@ -145,25 +145,25 @@ export default function SchedulePrintPage() {
 
             <div style={{marginBottom:'24px'}}>
               <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #7c3aed', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>作業予定一覧</h2>
-              {records.length === 0 ? (
+              {schedules.length === 0 ? (
                 <div style={{color:'#9ca3af', fontSize:'14px'}}>該当する予定がありません</div>
               ) : (
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
                   <thead>
                     <tr style={{background:'#f3f4f6'}}>
-                      {['予定日','案件名','数量','単価','金額'].map(h => (
-                        <th key={h} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign: h==='予定日'||h==='案件名' ? 'left' : 'right', color:'#374151'}}>{h}</th>
+                      {['予定日','案件名','数量','単価','備考'].map(h => (
+                        <th key={h} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign: h==='数量'||h==='単価' ? 'right' : 'left', color:'#374151'}}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {records.map((r, i) => (
+                    {schedules.map((s, i) => (
                       <tr key={i} style={{background: i % 2 === 0 ? 'white' : '#f9fafb'}}>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.work_date}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{r.projects?.name || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.quantity?.toLocaleString() || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.unit_price != null ? `¥${r.unit_price.toLocaleString()}` : '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{r.amount != null ? `¥${r.amount.toLocaleString()}` : '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{s.scheduled_date}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{s.projects?.name || '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.quantity != null ? s.quantity.toLocaleString() : '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.unit_price != null ? `¥${s.unit_price.toLocaleString()}` : '-'}</td>
+                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#6b7280'}}>{s.note || '-'}</td>
                       </tr>
                     ))}
                   </tbody>

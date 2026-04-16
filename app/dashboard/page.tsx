@@ -111,6 +111,7 @@ export default function DashboardPage() {
             { label: '📝 作業記録', path: '/records', color: '#9333ea' },
             { label: '💰 支払い管理', path: '/payments', color: '#d97706' },
             { label: '📊 集計レポート', path: '/reports', color: '#0891b2' },
+            { label: '📅 作業予定管理', path: '/schedules', color: '#7c3aed' },
           ].map((item) => (
             <button
               key={item.path}

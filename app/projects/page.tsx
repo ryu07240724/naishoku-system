@@ -75,19 +75,13 @@ export default function ProjectsPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>📋 案件一覧</h1>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button
-            onClick={() => router.push('/schedules')}
-            style={{ padding: '0.5rem 1.25rem', background: 'white', border: '2px solid #7c3aed', color: '#7c3aed', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-          >
-            📅 作業予定
-          </button>
-          <button
             onClick={() => router.push('/projects/new')}
             style={{ padding: '0.5rem 1.25rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
           >
             ＋ 新規登録
           </button>
           <button
-            onClick={() => router.push('/projects/new')}
+            onClick={() => router.push('/dashboard')}
             style={{ padding: '0.5rem 1.25rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
           >
             ダッシュボードへ
