@@ -27,7 +27,7 @@ export default function NewSchedulePage() {
   useEffect(() => {
     const fetchData = async () => {
       const { data: w } = await supabase.from('workers').select('id, name').eq('status', 'active').order('name')
-      const { data: p } = await supabase.from('projects').select('id, name').order('name')
+      const { data: p } = await supabase.from('projects').select('id, name, unit_price').order('name')
       if (w) setWorkers(w)
       if (p) setProjects(p)
     }
@@ -35,8 +35,18 @@ export default function NewSchedulePage() {
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  const { name, value } = e.target
+  if (name === 'project_id') {
+    const selected = projects.find(p => p.id === value)
+    setForm(prev => ({
+      ...prev,
+      project_id: value,
+      unit_price: selected?.unit_price != null ? String(selected.unit_price) : prev.unit_price,
+    }))
+  } else {
+    setForm(prev => ({ ...prev, [name]: value }))
   }
+}
 
   const handleSubmit = async () => {
     if (!form.worker_id || !form.project_id) {
