@@ -1,122 +1,146 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function ScheduleEditPage() {
+export default function EditSchedulePage() {
   const router = useRouter()
-  const { id } = useParams()
+  const params = useParams()
+  const id = params.id as string
+
   const [workers, setWorkers] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
-  const [workerId, setWorkerId] = useState('')
-  const [projectId, setProjectId] = useState('')
-  const [scheduledDate, setScheduledDate] = useState('')
-  const [quantity, setQuantity] = useState('')
-  const [unitPrice, setUnitPrice] = useState('')
-  const [note, setNote] = useState('')
+  const [form, setForm] = useState({
+    worker_id: '',
+    project_id: '',
+    start_date: '',
+    delivery_date: '',
+    quantity: '',
+    unit_price: '',
+    note: '',
+  })
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.from('workers').select('*').order('name').then(({ data }) => { if (data) setWorkers(data) })
-    supabase.from('projects').select('*').order('name').then(({ data }) => { if (data) setProjects(data) })
-    supabase.from('schedules').select('*').eq('id', id).single().then(({ data }) => {
-      if (data) {
-        setWorkerId(data.worker_id || '')
-        setProjectId(data.project_id || '')
-        setScheduledDate(data.scheduled_date || '')
-        setQuantity(data.quantity != null ? String(data.quantity) : '')
-        setUnitPrice(data.unit_price != null ? String(data.unit_price) : '')
-        setNote(data.note || '')
+    const fetchData = async () => {
+      const { data: w } = await supabase.from('workers').select('id, name').eq('status', 'active').order('name')
+      const { data: p } = await supabase.from('projects').select('id, name').order('name')
+      if (w) setWorkers(w)
+      if (p) setProjects(p)
+
+      const { data: s } = await supabase.from('schedules').select('*').eq('id', id).single()
+      if (s) {
+        setForm({
+          worker_id: s.worker_id || '',
+          project_id: s.project_id || '',
+          start_date: s.start_date || '',
+          delivery_date: s.delivery_date || '',
+          quantity: s.quantity != null ? String(s.quantity) : '',
+          unit_price: s.unit_price != null ? String(s.unit_price) : '',
+          note: s.note || '',
+        })
       }
       setLoading(false)
-    })
+    }
+    fetchData()
   }, [id])
 
-  const handleSave = async () => {
-    if (!workerId || !projectId || !scheduledDate) {
-      alert('ワーカー・案件・予定日は必須です')
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async () => {
+    if (!form.worker_id || !form.project_id) {
+      alert('ワーカーと案件は必須です')
       return
     }
     setSaving(true)
-    await supabase.from('schedules').update({
-      worker_id: workerId,
-      project_id: projectId,
-      scheduled_date: scheduledDate,
-      quantity: quantity !== '' ? Number(quantity) : null,
-      unit_price: unitPrice !== '' ? Number(unitPrice) : null,
-      note: note || null,
+    const { error } = await supabase.from('schedules').update({
+      worker_id: form.worker_id,
+      project_id: form.project_id,
+      start_date: form.start_date || null,
+      delivery_date: form.delivery_date || null,
+      quantity: form.quantity ? Number(form.quantity) : null,
+      unit_price: form.unit_price ? Number(form.unit_price) : null,
+      note: form.note || null,
     }).eq('id', id)
+    setSaving(false)
+    if (error) { alert('エラー: ' + error.message); return }
     router.push('/schedules')
   }
 
-  if (loading) return <div style={{minHeight:'100vh', background:'#f9fafb', display:'flex', alignItems:'center', justifyContent:'center', color:'#6b7280'}}>読み込み中...</div>
+  const inputStyle = { width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', color: '#111827', background: 'white', fontSize: '14px', boxSizing: 'border-box' as const }
+  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }
+
+  if (loading) return <div style={{ background: '#f9fafb', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#111827' }}>読み込み中...</div>
 
   return (
-    <div style={{minHeight:'100vh', background:'#f9fafb', color:'#111827'}}>
-      <div style={{maxWidth:600, margin:'0 auto', padding:'24px 16px'}}>
-        <div style={{display:'flex', alignItems:'center', gap:12, marginBottom:24}}>
-          <Link href="/schedules" style={{color:'#6b7280', textDecoration:'none', fontSize:14}}>← 予定一覧へ戻る</Link>
-          <span style={{color:'#6b7280'}}>|</span>
-          <span style={{fontWeight:'bold', fontSize:16, color:'#111827'}}>作業予定 編集</span>
+    <div style={{ background: '#f9fafb', minHeight: '100vh', color: '#111827' }}>
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '24px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+          <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>←</button>
+          <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>作業予定 編集</h1>
         </div>
 
-        <div style={{background:'white', borderRadius:12, padding:'24px', boxShadow:'0 1px 3px rgba(0,0,0,0.08)'}}>
-          {[
-            { label: 'ワーカー *', node: (
-              <select value={workerId} onChange={e => setWorkerId(e.target.value)}
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white'}}>
-                <option value="">選択してください</option>
-                {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-              </select>
-            )},
-            { label: '案件 *', node: (
-              <select value={projectId} onChange={e => setProjectId(e.target.value)}
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white'}}>
-                <option value="">選択してください</option>
-                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-            )},
-            { label: '予定日 *', node: (
-              <input type="date" value={scheduledDate} onChange={e => setScheduledDate(e.target.value)}
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white', boxSizing:'border-box'}} />
-            )},
-            { label: '数量', node: (
-              <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="任意"
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white', boxSizing:'border-box'}} />
-            )},
-            { label: '単価', node: (
-              <input type="number" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} placeholder="任意"
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white', boxSizing:'border-box'}} />
-            )},
-            { label: '備考', node: (
-              <textarea value={note} onChange={e => setNote(e.target.value)} rows={3} placeholder="任意"
-                style={{width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, color:'#111827', background:'white', resize:'vertical', boxSizing:'border-box'}} />
-            )},
-          ].map(({ label, node }) => (
-            <div key={label} style={{marginBottom:16}}>
-              <div style={{fontSize:13, fontWeight:'600', color:'#374151', marginBottom:6}}>{label}</div>
-              {node}
-            </div>
-          ))}
+        <div style={{ background: 'white', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-          <div style={{display:'flex', gap:10, marginTop:8}}>
-            <button onClick={handleSave} disabled={saving}
-              style={{padding:'10px 24px', background:'#2563eb', color:'white', border:'none', borderRadius:8, fontSize:14, fontWeight:'600', cursor:'pointer'}}>
-              {saving ? '保存中...' : '保存する'}
-            </button>
-            <button onClick={() => router.push('/schedules')}
-              style={{padding:'10px 24px', background:'#f3f4f6', color:'#374151', border:'none', borderRadius:8, fontSize:14, cursor:'pointer'}}>
-              キャンセル
-            </button>
+          <div>
+            <label style={labelStyle}>ワーカー <span style={{ color: 'red' }}>*</span></label>
+            <select name="worker_id" value={form.worker_id} onChange={handleChange} style={inputStyle}>
+              <option value="">選択してください</option>
+              {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+            </select>
           </div>
+
+          <div>
+            <label style={labelStyle}>案件 <span style={{ color: 'red' }}>*</span></label>
+            <select name="project_id" value={form.project_id} onChange={handleChange} style={inputStyle}>
+              <option value="">選択してください</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={labelStyle}>開始日</label>
+              <input type="date" name="start_date" value={form.start_date} onChange={handleChange} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>納入日</label>
+              <input type="date" name="delivery_date" value={form.delivery_date} onChange={handleChange} style={inputStyle} />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={labelStyle}>数量</label>
+              <input type="number" name="quantity" value={form.quantity} onChange={handleChange} style={inputStyle} placeholder="0" />
+            </div>
+            <div>
+              <label style={labelStyle}>単価（円）</label>
+              <input type="number" name="unit_price" value={form.unit_price} onChange={handleChange} style={inputStyle} placeholder="0" />
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>備考</label>
+            <textarea name="note" value={form.note} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} placeholder="メモがあれば入力" />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            style={{ width: '100%', padding: '12px', background: saving ? '#9ca3af' : '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}
+          >
+            {saving ? '保存中...' : '保存する'}
+          </button>
         </div>
       </div>
     </div>

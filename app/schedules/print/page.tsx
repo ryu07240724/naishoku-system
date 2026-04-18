@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import Link from 'next/link'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,174 +11,151 @@ const supabase = createClient(
 export default function SchedulePrintPage() {
   const [workers, setWorkers] = useState<any[]>([])
   const [selectedWorker, setSelectedWorker] = useState('')
-  const today = new Date()
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-  const [dateFrom, setDateFrom] = useState(todayStr)
-  const [dateTo, setDateTo] = useState('')
+  const [filterFrom, setFilterFrom] = useState('')
+  const [filterTo, setFilterTo] = useState('')
   const [schedules, setSchedules] = useState<any[]>([])
-  const [workerInfo, setWorkerInfo] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
-  const [memo, setMemo] = useState('')
+  const [note, setNote] = useState('')
+  const [preview, setPreview] = useState(false)
 
   useEffect(() => {
-    supabase.from('workers').select('*').order('name').then(({ data }) => { if (data) setWorkers(data) })
-    supabase.from('settings').select('*').eq('id', 'main').single().then(({ data }) => { if (data) setSettings(data) })
+    const fetchInit = async () => {
+      const { data: w } = await supabase.from('workers').select('id, name').eq('status', 'active').order('name')
+      const { data: s } = await supabase.from('settings').select('*').single()
+      if (w) setWorkers(w)
+      if (s) setSettings(s)
+    }
+    fetchInit()
   }, [])
 
-  const handleSearch = async () => {
-    if (!selectedWorker) return
-    setLoading(true)
-    setSearched(true)
+  const handlePreview = async () => {
     let query = supabase
       .from('schedules')
-      .select('*, projects(name)')
-      .eq('worker_id', selectedWorker)
-      .order('scheduled_date')
-    if (dateFrom) query = query.gte('scheduled_date', dateFrom)
-    if (dateTo) query = query.lte('scheduled_date', dateTo)
+      .select('*, workers(name), projects(name)')
+      .order('start_date', { ascending: true })
+
+    if (selectedWorker) query = query.eq('worker_id', selectedWorker)
+    if (filterFrom) query = query.gte('start_date', filterFrom)
+    if (filterTo) query = query.lte('delivery_date', filterTo)
+
     const { data } = await query
-    const worker = workers.find(w => w.id === selectedWorker)
     setSchedules(data || [])
-    setWorkerInfo(worker || null)
-    setLoading(false)
+    setPreview(true)
   }
 
-  const issuedDate = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`
-  const periodLabel = dateFrom && dateTo
-    ? `${dateFrom} 〜 ${dateTo}`
-    : dateFrom ? `${dateFrom} 以降`
-    : dateTo ? `${dateTo} まで`
-    : '全期間'
+  const inputStyle = { padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', color: '#111827', background: 'white', fontSize: '14px' }
+  const workerName = workers.find(w => w.id === selectedWorker)?.name || ''
 
   return (
-    <div style={{minHeight:'100vh', background:'#f9fafb', color:'#111827'}}>
+    <div style={{ background: '#f9fafb', minHeight: '100vh', color: '#111827' }}>
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { margin: 0; }
-          .print-area { padding: 20px; }
-        }
-        @media screen {
-          .print-area { max-width: 800px; margin: 0 auto; padding: 24px; }
+          body { background: white; }
         }
       `}</style>
 
       {/* 操作パネル */}
-      <div className="no-print" style={{background:'#f3f4f6', padding:'16px', borderBottom:'1px solid #e5e7eb'}}>
-        <div style={{maxWidth:'800px', margin:'0 auto'}}>
-          <div style={{display:'flex', alignItems:'center', gap:'12px', flexWrap:'wrap'}}>
-            <Link href="/schedules" style={{color:'#6b7280', textDecoration:'none', fontSize:'14px'}}>← 予定一覧へ戻る</Link>
-            <span style={{color:'#6b7280'}}>|</span>
-            <span style={{fontWeight:'bold', fontSize:'16px', color:'#111827'}}>作業予定表（印刷）</span>
+      <div className="no-print" style={{ maxWidth: '700px', margin: '0 auto', padding: '24px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>←</button>
+          <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>🖨️ 作業予定表（印刷）</h1>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '10px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>ワーカー</div>
+            <select value={selectedWorker} onChange={e => { setSelectedWorker(e.target.value); setPreview(false) }} style={{ ...inputStyle, width: '100%' }}>
+              <option value="">全員</option>
+              {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+            </select>
           </div>
-          <div style={{display:'flex', gap:'12px', marginTop:'12px', flexWrap:'wrap', alignItems:'flex-end'}}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>ワーカー</div>
-              <select value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}}>
-                <option value="">選択してください</option>
-                {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-              </select>
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>開始日 From</div>
+              <input type="date" value={filterFrom} onChange={e => { setFilterFrom(e.target.value); setPreview(false) }} style={{ ...inputStyle, width: '100%' }} />
             </div>
             <div>
-              <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>開始日</div>
-              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}} />
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>納入日 To</div>
+              <input type="date" value={filterTo} onChange={e => { setFilterTo(e.target.value); setPreview(false) }} style={{ ...inputStyle, width: '100%' }} />
             </div>
-            <div>
-              <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>終了日</div>
-              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                style={{padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white'}} />
-            </div>
-            <button onClick={handleSearch} disabled={!selectedWorker || loading}
-              style={{padding:'8px 20px', background:'#2563eb', color:'white', border:'none', borderRadius:'6px', fontSize:'14px', cursor:'pointer'}}>
-              {loading ? '読込中...' : '表示'}
+          </div>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>備考</div>
+            <textarea value={note} onChange={e => setNote(e.target.value)} rows={2} style={{ ...inputStyle, width: '100%', resize: 'vertical', boxSizing: 'border-box' }} placeholder="印刷に反映されます" />
+          </div>
+          <button onClick={handlePreview} style={{ padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
+            プレビュー表示
+          </button>
+          {preview && (
+            <button onClick={() => window.print()} style={{ padding: '10px', background: '#059669', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
+              🖨️ 印刷 / PDF保存
             </button>
-            {searched && (
-              <button onClick={() => window.print()}
-                style={{padding:'8px 20px', background:'#10b981', color:'white', border:'none', borderRadius:'6px', fontSize:'14px', cursor:'pointer'}}>
-                🖨️ 印刷 / PDF保存
-              </button>
-            )}
-          </div>
-          {searched && (
-            <div style={{marginTop:'12px'}}>
-              <div style={{fontSize:'12px', color:'#6b7280', marginBottom:'4px'}}>備考（印刷に反映されます）</div>
-              <textarea value={memo} onChange={e => setMemo(e.target.value)} rows={3} placeholder="備考があれば入力してください"
-                style={{width:'100%', padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:'6px', fontSize:'14px', color:'#111827', background:'white', resize:'vertical', boxSizing:'border-box'}} />
-            </div>
           )}
         </div>
       </div>
 
-      {/* 予定表本体 */}
-      <div className="print-area">
-        {!searched ? (
-          <div style={{textAlign:'center', color:'#9ca3af', marginTop:'60px', fontSize:'14px'}}>
-            ワーカーと期間を選択して「表示」を押してください
+      {/* 印刷プレビュー */}
+      {preview && (
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px', background: 'white' }}>
+          {/* ヘッダー */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div>
+              <h2 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 6px' }}>作業予定表</h2>
+              {workerName && <div style={{ fontSize: '15px' }}>担当：{workerName}</div>}
+              <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
+                {filterFrom && `${filterFrom}`}{filterFrom && filterTo && ' 〜 '}{filterTo && `${filterTo}`}
+              </div>
+            </div>
+            {settings && (
+              <div style={{ textAlign: 'right', fontSize: '12px', color: '#374151', lineHeight: '1.6' }}>
+                {settings.company_name && <div style={{ fontWeight: 600 }}>{settings.company_name}</div>}
+                {settings.address && <div>{settings.address}</div>}
+                {settings.phone && <div>TEL: {settings.phone}</div>}
+                {settings.email && <div>{settings.email}</div>}
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div style={{textAlign:'center', marginBottom:'24px'}}>
-              <h1 style={{fontSize:'22px', fontWeight:'bold', margin:'0 0 4px', color:'#111827'}}>作業予定表</h1>
-              <div style={{color:'#6b7280', fontSize:'14px'}}>{periodLabel}</div>
-            </div>
 
-            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px'}}>
-              <div>
-                <div style={{fontSize:'18px', fontWeight:'bold', borderBottom:'2px solid #111', paddingBottom:'4px', color:'#111827'}}>
-                  {workerInfo?.name} 様
-                </div>
-              </div>
-              <div style={{textAlign:'right', fontSize:'13px', color:'#374151', lineHeight:'1.8'}}>
-                {settings?.company_name && <div style={{fontWeight:'bold', fontSize:'15px', color:'#111827'}}>{settings.company_name}</div>}
-                {settings?.owner_name && <div>{settings.owner_name}</div>}
-                {settings?.address && <div>{settings.address}</div>}
-                {settings?.phone && <div>TEL：{settings.phone}</div>}
-                {settings?.email && <div>{settings.email}</div>}
-                <div style={{marginTop:'4px'}}>発行日：{issuedDate}</div>
-              </div>
-            </div>
-
-            <div style={{marginBottom:'24px'}}>
-              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #7c3aed', paddingLeft:'8px', marginBottom:'12px', color:'#111827'}}>作業予定一覧</h2>
+          {/* テーブル */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ background: '#f3f4f6' }}>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>ワーカー</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>案件</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'center' }}>開始日</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'center' }}>納入日</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'right' }}>数量</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'right' }}>単価</th>
+                <th style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'left' }}>備考</th>
+              </tr>
+            </thead>
+            <tbody>
               {schedules.length === 0 ? (
-                <div style={{color:'#9ca3af', fontSize:'14px'}}>該当する予定がありません</div>
-              ) : (
-                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
-                  <thead>
-                    <tr style={{background:'#f3f4f6'}}>
-                      {['予定日','案件名','数量','単価','備考'].map(h => (
-                        <th key={h} style={{padding:'8px', border:'1px solid #e5e7eb', textAlign: h==='数量'||h==='単価' ? 'right' : 'left', color:'#374151'}}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {schedules.map((s, i) => (
-                      <tr key={i} style={{background: i % 2 === 0 ? 'white' : '#f9fafb'}}>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{s.scheduled_date}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#111827'}}>{s.projects?.name || '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.quantity != null ? s.quantity.toLocaleString() : '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', textAlign:'right', color:'#111827'}}>{s.unit_price != null ? `¥${s.unit_price.toLocaleString()}` : '-'}</td>
-                        <td style={{padding:'8px', border:'1px solid #e5e7eb', color:'#6b7280'}}>{s.note || '-'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                <tr><td colSpan={7} style={{ border: '1px solid #d1d5db', padding: '16px', textAlign: 'center', color: '#6b7280' }}>データがありません</td></tr>
+              ) : schedules.map(s => (
+                <tr key={s.id}>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{s.workers?.name}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{s.projects?.name}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'center' }}>{s.start_date || '―'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'center' }}>{s.delivery_date || '―'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'right' }}>{s.quantity ?? '―'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px', textAlign: 'right' }}>{s.unit_price ? `¥${Number(s.unit_price).toLocaleString()}` : '―'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '8px' }}>{s.note || ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-            <div style={{marginTop:'32px'}}>
-              <h2 style={{fontSize:'15px', fontWeight:'bold', borderLeft:'4px solid #f59e0b', paddingLeft:'8px', marginBottom:'8px', color:'#111827'}}>備考</h2>
-              <div style={{border:'1px solid #e5e7eb', borderRadius:'6px', padding:'12px', minHeight:'80px', background:'white', fontSize:'13px', color:'#111827', whiteSpace:'pre-wrap'}}>
-                {memo || ''}
-              </div>
+          {/* 備考 */}
+          {note && (
+            <div style={{ marginTop: '20px', padding: '12px', border: '1px solid #d1d5db', borderRadius: '6px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>備考</div>
+              <div style={{ fontSize: '13px', whiteSpace: 'pre-wrap' }}>{note}</div>
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
