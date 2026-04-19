@@ -9,10 +9,15 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+type Category = { id: string; name: string }
+type Project = { id: string; name: string; unit_price: number; category_id: string | null }
+
 export default function NewSchedulePage() {
   const router = useRouter()
   const [workers, setWorkers] = useState<any[]>([])
-  const [projects, setProjects] = useState<any[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [form, setForm] = useState({
     worker_id: '',
     project_id: '',
@@ -26,32 +31,47 @@ export default function NewSchedulePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: w } = await supabase.from('workers').select('id, name').eq('status', 'active').order('name')
-      const { data: p } = await supabase.from('projects').select('id, name, unit_price').order('name')
+      const [{ data: w }, { data: p }, { data: c }] = await Promise.all([
+        supabase.from('workers').select('id, name').eq('status', 'active').order('name'),
+        supabase.from('projects').select('id, name, unit_price, category_id').order('name'),
+        supabase.from('project_categories').select('*').order('sort_order').order('created_at'),
+      ])
       if (w) setWorkers(w)
       if (p) setProjects(p)
+      if (c) setCategories(c)
     }
     fetchData()
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-  const { name, value } = e.target
-  if (name === 'project_id') {
-    const selected = projects.find(p => p.id === value)
-    setForm(prev => ({
-      ...prev,
-      project_id: value,
-      unit_price: selected?.unit_price != null ? String(selected.unit_price) : prev.unit_price,
-    }))
-  } else {
-    setForm(prev => ({ ...prev, [name]: value }))
+  // 大項目でフィルタした案件
+  const filteredProjects = selectedCategoryId === ''
+    ? projects
+    : selectedCategoryId === 'none'
+      ? projects.filter(p => !p.category_id)
+      : projects.filter(p => p.category_id === selectedCategoryId)
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategoryId(e.target.value)
+    setForm(prev => ({ ...prev, project_id: '', unit_price: '' }))
   }
-}
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    if (name === 'project_id') {
+      const selected = projects.find(p => p.id === value)
+      setForm(prev => ({
+        ...prev,
+        project_id: value,
+        unit_price: selected?.unit_price != null ? String(selected.unit_price) : prev.unit_price,
+      }))
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }))
+    }
+  }
 
   const handleSubmit = async () => {
     if (!form.worker_id || !form.project_id) {
-      alert('ワーカーと案件は必須です')
-      return
+      alert('ワーカーと案件は必須です'); return
     }
     setSaving(true)
     const { error } = await supabase.from('schedules').insert({
@@ -69,7 +89,7 @@ export default function NewSchedulePage() {
   }
 
   const inputStyle = { width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', color: '#111827', background: 'white', fontSize: '14px', boxSizing: 'border-box' as const }
-  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }
+  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' } as const
 
   return (
     <div style={{ background: '#f9fafb', minHeight: '100vh', color: '#111827' }}>
@@ -81,6 +101,7 @@ export default function NewSchedulePage() {
 
         <div style={{ background: 'white', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
+          {/* ワーカー */}
           <div>
             <label style={labelStyle}>ワーカー <span style={{ color: 'red' }}>*</span></label>
             <select name="worker_id" value={form.worker_id} onChange={handleChange} style={inputStyle}>
@@ -89,14 +110,26 @@ export default function NewSchedulePage() {
             </select>
           </div>
 
+          {/* 案件：2段階選択 */}
           <div>
             <label style={labelStyle}>案件 <span style={{ color: 'red' }}>*</span></label>
-            <select name="project_id" value={form.project_id} onChange={handleChange} style={inputStyle}>
-              <option value="">選択してください</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {/* ① 大項目 */}
+            <select value={selectedCategoryId} onChange={handleCategoryChange} style={{ ...inputStyle, marginBottom: '6px' }}>
+              <option value="">すべての大項目</option>
+              {categories.map(c => <option key={c.id} value={c.id}>📁 {c.name}</option>)}
+              <option value="none">📁 未分類</option>
             </select>
+            {/* ② 案件 */}
+            <select name="project_id" value={form.project_id} onChange={handleChange} style={inputStyle}>
+              <option value="">案件を選択してください</option>
+              {filteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            {filteredProjects.length === 0 && selectedCategoryId && (
+              <p style={{ fontSize: '12px', color: '#9ca3af', margin: '4px 0 0' }}>この大項目に案件がありません</p>
+            )}
           </div>
 
+          {/* 開始日・納入日 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>開始日</label>
@@ -108,6 +141,7 @@ export default function NewSchedulePage() {
             </div>
           </div>
 
+          {/* 数量・単価 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>数量</label>
@@ -119,16 +153,14 @@ export default function NewSchedulePage() {
             </div>
           </div>
 
+          {/* 備考 */}
           <div>
             <label style={labelStyle}>備考</label>
             <textarea name="note" value={form.note} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} placeholder="メモがあれば入力" />
           </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={saving}
-            style={{ width: '100%', padding: '12px', background: saving ? '#9ca3af' : '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}
-          >
+          <button onClick={handleSubmit} disabled={saving}
+            style={{ width: '100%', padding: '12px', background: saving ? '#9ca3af' : '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}>
             {saving ? '登録中...' : '登録する'}
           </button>
         </div>
