@@ -14,7 +14,7 @@ type Schedule = {
   delivery_date: string | null
   quantity: number | null
   unit_price: number | null
-  projects: { name: string } | null
+  projects: { name: string } | { name: string }[] | null
 }
 
 export default function NewRecordPage() {
@@ -24,7 +24,6 @@ export default function NewRecordPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
 
-  // 作業予定関連
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [useSchedule, setUseSchedule] = useState<'select' | 'manual'>('select')
   const [selectedScheduleId, setSelectedScheduleId] = useState('')
@@ -56,7 +55,6 @@ export default function NewRecordPage() {
     load()
   }, [])
 
-  // ワーカー選択時に作業予定を取得
   const handleWorkerChange = async (workerId: string) => {
     setForm(f => ({ ...f, worker_id: workerId, project_id: '' }))
     setSelectedScheduleId('')
@@ -68,7 +66,6 @@ export default function NewRecordPage() {
     setSchedulesLoading(true)
     const today = new Date()
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-    // 今日以降の予定を取得
     const { data } = await supabase
       .from('schedules')
       .select('id, project_id, start_date, delivery_date, quantity, unit_price, projects(name)')
@@ -76,11 +73,16 @@ export default function NewRecordPage() {
       .gte('start_date', todayStr)
       .order('start_date', { ascending: true })
       .limit(30)
-    setSchedules(data || [])
+    setSchedules((data as Schedule[]) || [])
     setSchedulesLoading(false)
   }
 
-  // 作業予定を選択したとき各フィールドに自動入力
+  const getProjectName = (s: Schedule): string => {
+    if (!s.projects) return '案件不明'
+    if (Array.isArray(s.projects)) return s.projects[0]?.name ?? '案件不明'
+    return s.projects.name ?? '案件不明'
+  }
+
   const handleScheduleSelect = (scheduleId: string) => {
     setSelectedScheduleId(scheduleId)
     if (!scheduleId) {
@@ -98,16 +100,13 @@ export default function NewRecordPage() {
       work_date: s.start_date ?? f.work_date,
       quantity: s.quantity != null ? String(s.quantity) : '',
     }))
-    // 予定に単価があればそれを、なければ案件の単価を使う
     const price = s.unit_price != null ? s.unit_price : (proj?.unit_price ?? 0)
     setUnitPrice(price)
     setUnit(proj?.unit ?? '個')
-    // 大項目も自動セット
     if (proj?.category_id) setSelectedCategoryId(proj.category_id)
     else setSelectedCategoryId('none')
   }
 
-  // 大項目でフィルタした案件
   const filteredProjects = selectedCategoryId === ''
     ? projects
     : selectedCategoryId === 'none'
@@ -223,7 +222,7 @@ export default function NewRecordPage() {
                           }}
                         >
                           <div style={{ fontWeight: 600, fontSize: '14px', color: '#111827', marginBottom: '3px' }}>
-                            {s.projects?.name ?? '案件不明'}
+                            {getProjectName(s)}
                           </div>
                           <div style={{ fontSize: '12px', color: '#6b7280', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                             {s.start_date && <span>📅 {s.start_date}</span>}
