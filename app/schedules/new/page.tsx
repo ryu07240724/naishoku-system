@@ -31,12 +31,10 @@ export default function NewSchedulePage() {
     note: '',
   })
 
-  // 繰り返し設定
   const [repeatType, setRepeatType] = useState<RepeatType>('none')
   const [repeatWeekdays, setRepeatWeekdays] = useState<number[]>([])
   const [repeatCount, setRepeatCount] = useState('4')
   const [intervalWeeks, setIntervalWeeks] = useState('1')
-
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -91,7 +89,6 @@ export default function NewSchedulePage() {
     return `${yy}-${mm}-${dd}`
   }
 
-  // 繰り返し日付リストを生成（開始日ベース）
   const buildStartDates = (): string[] => {
     if (repeatType === 'none' || !form.start_date) return form.start_date ? [form.start_date] : []
     const [y, m, d] = form.start_date.split('-').map(Number)
@@ -100,7 +97,6 @@ export default function NewSchedulePage() {
     const dates: string[] = []
 
     if (repeatType === 'weekly') {
-      // 指定曜日で毎週（interval週ごと）
       const days = repeatWeekdays.length > 0 ? repeatWeekdays : [base.getDay()]
       const interval = Math.max(1, Number(intervalWeeks) || 1)
       let added = 0, offset = 0
@@ -108,7 +104,6 @@ export default function NewSchedulePage() {
         const dt = new Date(base)
         dt.setDate(dt.getDate() + offset)
         if (days.includes(dt.getDay())) {
-          // interval週ごとチェック
           const weekDiff = Math.floor(offset / 7)
           if (weekDiff % interval === 0) {
             dates.push(fmt(dt))
@@ -119,26 +114,19 @@ export default function NewSchedulePage() {
         if (offset > 730) break
       }
     } else if (repeatType === 'monthly_date') {
-      // 毎月同じ日付
       for (let i = 0; i < count; i++) {
         const dt = new Date(y, m - 1 + i, d)
         dates.push(fmt(dt))
       }
     } else if (repeatType === 'monthly_weekday') {
-      // 毎月同じ曜日（例：第2月曜）
-      const weekNum = Math.ceil(d / 7) // 何週目か
+      const weekNum = Math.ceil(d / 7)
       const weekday = base.getDay()
       for (let i = 0; i < count; i++) {
-        // i月後の1日
-        const firstDay = new Date(y, m - 1 + i, 1)
-        // その月のweekday曜日を探す
-        let found = 0
         for (let day = 1; day <= 31; day++) {
           const dt = new Date(y, m - 1 + i, day)
-          if (dt.getMonth() !== (m - 1 + i) % 12 && dt.getFullYear() !== y + Math.floor((m - 1 + i) / 12)) break
+          if (dt.getMonth() !== (m - 1 + i) % 12) break
           if (dt.getDay() === weekday) {
-            found++
-            if (found === weekNum) { dates.push(fmt(dt)); break }
+            if (Math.ceil(day / 7) === weekNum) { dates.push(fmt(dt)); break }
           }
         }
       }
@@ -166,11 +154,13 @@ export default function NewSchedulePage() {
         quantity: form.quantity ? Number(form.quantity) : null,
         unit_price: form.unit_price ? Number(form.unit_price) : null,
         note: form.note || null,
+        repeat_group_id: null,
       })
       setSaving(false)
       if (error) { alert('エラー: ' + error.message); return }
     } else {
-      // 繰り返し：複数件insert
+      // 繰り返し：同じrepeat_group_idで複数件insert
+      const groupId = crypto.randomUUID()
       const records = previewDates.map(date => ({
         worker_id: form.worker_id,
         project_id: form.project_id,
@@ -179,6 +169,7 @@ export default function NewSchedulePage() {
         quantity: form.quantity ? Number(form.quantity) : null,
         unit_price: form.unit_price ? Number(form.unit_price) : null,
         note: form.note || null,
+        repeat_group_id: groupId,
       }))
       const { error } = await supabase.from('schedules').insert(records)
       setSaving(false)
@@ -251,12 +242,11 @@ export default function NewSchedulePage() {
 
         {/* 繰り返し設定 */}
         <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '16px', border: '2px dashed #e5e7eb' }}>
-          <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '16px', color: '#374151', margin: '0 0 16px' }}>🔁 繰り返し設定</p>
+          <p style={{ fontWeight: 700, fontSize: '14px', margin: '0 0 16px', color: '#374151' }}>🔁 繰り返し設定</p>
 
           <div style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>繰り返しパターン</label>
-            <select value={repeatType} onChange={e => { setRepeatType(e.target.value as RepeatType); setRepeatWeekdays([]) }}
-              style={inputStyle}>
+            <select value={repeatType} onChange={e => { setRepeatType(e.target.value as RepeatType); setRepeatWeekdays([]) }} style={inputStyle}>
               <option value="none">繰り返しなし（1件のみ）</option>
               <option value="weekly">毎週（曜日指定）</option>
               <option value="monthly_date">毎月同じ日付（例：毎月15日）</option>
@@ -264,7 +254,6 @@ export default function NewSchedulePage() {
             </select>
           </div>
 
-          {/* 開始日（繰り返しの起点） */}
           <div style={{ display: 'grid', gridTemplateColumns: repeatType === 'none' ? '1fr 1fr' : '1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
               <label style={labelStyle}>{repeatType === 'none' ? '開始日' : '繰り返し開始日'}</label>
@@ -278,7 +267,6 @@ export default function NewSchedulePage() {
             )}
           </div>
 
-          {/* 毎週：曜日選択 */}
           {repeatType === 'weekly' && (
             <>
               <div style={{ marginBottom: '14px' }}>
@@ -307,7 +295,6 @@ export default function NewSchedulePage() {
             </>
           )}
 
-          {/* 回数 */}
           {repeatType !== 'none' && (
             <div style={{ marginBottom: '14px' }}>
               <label style={labelStyle}>登録回数（最大52）</label>
@@ -320,7 +307,6 @@ export default function NewSchedulePage() {
             </div>
           )}
 
-          {/* プレビュー */}
           {repeatType !== 'none' && form.start_date && previewDates.length > 0 && (
             <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px' }}>
               <p style={{ fontWeight: 700, fontSize: '13px', color: '#1e40af', margin: '0 0 8px' }}>
