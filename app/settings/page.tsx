@@ -4,12 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/utils/supabase'
 
-type Category = {
-  id: string
-  name: string
-  sort_order: number
-}
-
 export default function SettingsPage() {
   const router = useRouter()
   const [companyName, setCompanyName] = useState('')
@@ -20,13 +14,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-
-  // 大項目
-  const [categories, setCategories] = useState<Category[]>([])
-  const [newCategoryName, setNewCategoryName] = useState('')
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
-  const [catSaving, setCatSaving] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
@@ -40,16 +27,10 @@ export default function SettingsPage() {
         setPhone(data.phone || '')
         setEmail(data.email || '')
       }
-      await loadCategories()
       setLoading(false)
     }
     fetch()
   }, [])
-
-  const loadCategories = async () => {
-    const { data } = await supabase.from('project_categories').select('*').order('sort_order').order('created_at')
-    setCategories(data || [])
-  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -66,31 +47,6 @@ export default function SettingsPage() {
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
-  }
-
-  const handleAddCategory = async () => {
-    const name = newCategoryName.trim()
-    if (!name) return
-    setCatSaving(true)
-    await supabase.from('project_categories').insert({ name, sort_order: categories.length })
-    setNewCategoryName('')
-    await loadCategories()
-    setCatSaving(false)
-  }
-
-  const handleUpdateCategory = async (id: string) => {
-    const name = editingName.trim()
-    if (!name) return
-    await supabase.from('project_categories').update({ name }).eq('id', id)
-    setEditingId(null)
-    setEditingName('')
-    await loadCategories()
-  }
-
-  const handleDeleteCategory = async (id: string) => {
-    if (!confirm('この大項目を削除しますか？\n※関連する案件の大項目は「未分類」になります。')) return
-    await supabase.from('project_categories').delete().eq('id', id)
-    await loadCategories()
   }
 
   const inputStyle = {
@@ -168,72 +124,6 @@ export default function SettingsPage() {
                 </button>
                 {saved && <span style={{color:'#10b981', fontSize:'14px', fontWeight:'600'}}>✅ 保存しました！</span>}
               </div>
-            </div>
-
-            {/* 案件大項目管理 */}
-            <div style={{background:'white', borderRadius:'12px', padding:'24px', boxShadow:'0 1px 3px rgba(0,0,0,0.08)'}}>
-              <h2 style={{fontSize:'16px', fontWeight:'bold', color:'#111827', margin:'0 0 8px', borderLeft:'4px solid #8b5cf6', paddingLeft:'8px'}}>案件の大項目管理</h2>
-              <p style={{fontSize:'13px', color:'#6b7280', margin:'0 0 20px'}}>案件を選ぶときのグループ分けに使います。</p>
-
-              {/* 新規追加 */}
-              <div style={{display:'flex', gap:'8px', marginBottom:'16px'}}>
-                <input
-                  value={newCategoryName}
-                  onChange={e => setNewCategoryName(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleAddCategory() }}
-                  placeholder="大項目名を入力（例：A社、縫製、検品）"
-                  style={{...inputStyle, flex:1}}
-                />
-                <button onClick={handleAddCategory} disabled={catSaving || !newCategoryName.trim()}
-                  style={{padding:'10px 16px', background:'#8b5cf6', color:'white', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'600', cursor:'pointer', whiteSpace:'nowrap'}}>
-                  ＋追加
-                </button>
-              </div>
-
-              {/* 一覧 */}
-              {categories.length === 0 ? (
-                <div style={{textAlign:'center', color:'#9ca3af', padding:'24px', fontSize:'14px'}}>
-                  大項目がまだありません
-                </div>
-              ) : (
-                <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
-                  {categories.map(cat => (
-                    <div key={cat.id} style={{display:'flex', alignItems:'center', gap:'8px', padding:'10px 12px', background:'#f9fafb', borderRadius:'8px', border:'1px solid #e5e7eb'}}>
-                      {editingId === cat.id ? (
-                        <>
-                          <input
-                            value={editingName}
-                            onChange={e => setEditingName(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') handleUpdateCategory(cat.id) }}
-                            style={{...inputStyle, flex:1, margin:0}}
-                            autoFocus
-                          />
-                          <button onClick={() => handleUpdateCategory(cat.id)}
-                            style={{padding:'6px 12px', background:'#10b981', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', cursor:'pointer'}}>
-                            保存
-                          </button>
-                          <button onClick={() => { setEditingId(null); setEditingName('') }}
-                            style={{padding:'6px 12px', background:'#6b7280', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', cursor:'pointer'}}>
-                            キャンセル
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <span style={{flex:1, fontSize:'14px', color:'#111827', fontWeight:'500'}}>📁 {cat.name}</span>
-                          <button onClick={() => { setEditingId(cat.id); setEditingName(cat.name) }}
-                            style={{padding:'6px 12px', background:'#3b82f6', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', cursor:'pointer'}}>
-                            編集
-                          </button>
-                          <button onClick={() => handleDeleteCategory(cat.id)}
-                            style={{padding:'6px 12px', background:'#ef4444', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', cursor:'pointer'}}>
-                            削除
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
           </div>
