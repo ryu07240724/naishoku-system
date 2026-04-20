@@ -35,6 +35,8 @@ export default function NewSchedulePage() {
   const [repeatWeekdays, setRepeatWeekdays] = useState<number[]>([])
   const [repeatCount, setRepeatCount] = useState('4')
   const [intervalWeeks, setIntervalWeeks] = useState('1')
+  // 繰り返し時の納入日オフセット（日数）
+  const [deliveryOffsetDays, setDeliveryOffsetDays] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -89,6 +91,14 @@ export default function NewSchedulePage() {
     return `${yy}-${mm}-${dd}`
   }
 
+  // 開始日から○日後の日付を計算
+  const addDays = (dateStr: string, days: number): string => {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const dt = new Date(y, m - 1, d)
+    dt.setDate(dt.getDate() + days)
+    return fmt(dt)
+  }
+
   const buildStartDates = (): string[] => {
     if (repeatType === 'none' || !form.start_date) return form.start_date ? [form.start_date] : []
     const [y, m, d] = form.start_date.split('-').map(Number)
@@ -105,18 +115,14 @@ export default function NewSchedulePage() {
         dt.setDate(dt.getDate() + offset)
         if (days.includes(dt.getDay())) {
           const weekDiff = Math.floor(offset / 7)
-          if (weekDiff % interval === 0) {
-            dates.push(fmt(dt))
-            added++
-          }
+          if (weekDiff % interval === 0) { dates.push(fmt(dt)); added++ }
         }
         offset++
         if (offset > 730) break
       }
     } else if (repeatType === 'monthly_date') {
       for (let i = 0; i < count; i++) {
-        const dt = new Date(y, m - 1 + i, d)
-        dates.push(fmt(dt))
+        dates.push(fmt(new Date(y, m - 1 + i, d)))
       }
     } else if (repeatType === 'monthly_weekday') {
       const weekNum = Math.ceil(d / 7)
@@ -125,8 +131,8 @@ export default function NewSchedulePage() {
         for (let day = 1; day <= 31; day++) {
           const dt = new Date(y, m - 1 + i, day)
           if (dt.getMonth() !== (m - 1 + i) % 12) break
-          if (dt.getDay() === weekday) {
-            if (Math.ceil(day / 7) === weekNum) { dates.push(fmt(dt)); break }
+          if (dt.getDay() === weekday && Math.ceil(day / 7) === weekNum) {
+            dates.push(fmt(dt)); break
           }
         }
       }
@@ -145,6 +151,8 @@ export default function NewSchedulePage() {
     }
     setSaving(true)
 
+    const offsetDays = deliveryOffsetDays !== '' ? Number(deliveryOffsetDays) : null
+
     if (repeatType === 'none') {
       const { error } = await supabase.from('schedules').insert({
         worker_id: form.worker_id,
@@ -159,13 +167,13 @@ export default function NewSchedulePage() {
       setSaving(false)
       if (error) { alert('エラー: ' + error.message); return }
     } else {
-      // 繰り返し：同じrepeat_group_idで複数件insert
       const groupId = crypto.randomUUID()
       const records = previewDates.map(date => ({
         worker_id: form.worker_id,
         project_id: form.project_id,
         start_date: date,
-        delivery_date: null,
+        // オフセットが設定されていれば各開始日から計算、なければnull
+        delivery_date: offsetDays !== null ? addDays(date, offsetDays) : null,
         quantity: form.quantity ? Number(form.quantity) : null,
         unit_price: form.unit_price ? Number(form.unit_price) : null,
         note: form.note || null,
@@ -254,19 +262,47 @@ export default function NewSchedulePage() {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: repeatType === 'none' ? '1fr 1fr' : '1fr', gap: '12px', marginBottom: '14px' }}>
-            <div>
-              <label style={labelStyle}>{repeatType === 'none' ? '開始日' : '繰り返し開始日'}</label>
-              <input type="date" name="start_date" value={form.start_date} onChange={handleChange} style={inputStyle} />
-            </div>
-            {repeatType === 'none' && (
-              <div>
+          {/* 開始日 */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>{repeatType === 'none' ? '開始日' : '繰り返し開始日'}</label>
+            <input type="date" name="start_date" value={form.start_date} onChange={handleChange} style={inputStyle} />
+          </div>
+
+          {/* 納入日：繰り返しなし→日付直接入力 / 繰り返しあり→○日後 */}
+          <div style={{ marginBottom: '14px' }}>
+            {repeatType === 'none' ? (
+              <>
                 <label style={labelStyle}>納入日</label>
                 <input type="date" name="delivery_date" value={form.delivery_date} onChange={handleChange} style={inputStyle} />
-              </div>
+              </>
+            ) : (
+              <>
+                <label style={labelStyle}>納入日（開始日の何日後）</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="number"
+                    value={deliveryOffsetDays}
+                    onChange={e => setDeliveryOffsetDays(e.target.value)}
+                    min={0}
+                    max={365}
+                    placeholder="例：7"
+                    style={{ width: '100px', padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', color: '#111827', background: 'white' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#374151' }}>日後</span>
+                  <span style={{ fontSize: '12px', color: '#9ca3af' }}>（空欄=納入日なし）</span>
+                </div>
+                {/* プレビュー：オフセットが設定されていれば最初の数件を表示 */}
+                {deliveryOffsetDays !== '' && previewDates.length > 0 && (
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+                    例）{previewDates[0]} → 納入日：{addDays(previewDates[0], Number(deliveryOffsetDays))}
+                    {previewDates[1] && <>、{previewDates[1]} → 納入日：{addDays(previewDates[1], Number(deliveryOffsetDays))}</>}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
+          {/* 毎週：曜日選択 */}
           {repeatType === 'weekly' && (
             <>
               <div style={{ marginBottom: '14px' }}>
@@ -295,6 +331,7 @@ export default function NewSchedulePage() {
             </>
           )}
 
+          {/* 回数 */}
           {repeatType !== 'none' && (
             <div style={{ marginBottom: '14px' }}>
               <label style={labelStyle}>登録回数（最大52）</label>
@@ -307,16 +344,22 @@ export default function NewSchedulePage() {
             </div>
           )}
 
+          {/* プレビュー */}
           {repeatType !== 'none' && form.start_date && previewDates.length > 0 && (
             <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px' }}>
               <p style={{ fontWeight: 700, fontSize: '13px', color: '#1e40af', margin: '0 0 8px' }}>
-                📅 登録予定日（{previewDates.length}件）
+                📅 登録予定（{previewDates.length}件）
               </p>
-              <div style={{ maxHeight: '160px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {previewDates.map((d, i) => (
-                  <span key={i} style={{ fontSize: '12px', background: 'white', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '2px 8px', color: '#1e40af' }}>
-                    {d}
-                  </span>
+                  <div key={i} style={{ fontSize: '12px', color: '#1e40af', display: 'flex', gap: '8px' }}>
+                    <span style={{ background: 'white', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '1px 8px', minWidth: '90px' }}>開始：{d}</span>
+                    {deliveryOffsetDays !== '' && (
+                      <span style={{ background: '#dbeafe', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '1px 8px' }}>
+                        納入：{addDays(d, Number(deliveryOffsetDays))}
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
