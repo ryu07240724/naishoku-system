@@ -39,7 +39,8 @@ export default function LpPage() {
       {/* ヒーロー */}
       <div className="hero">
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
-          <h1>Excelと紙の内職管理、<br />月末に憂鬱になっていませんか</h1>
+          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', color: '#185fa5', marginBottom: 16 }}>Tanomi</div>
+          <h1>Excelと紙の外注管理、<br />月末に憂鬱になっていませんか</h1>
           <p>ワーカーの記録・集計・支払いが、<br />スマホ1台でできるようになります</p>
           <a href="#contact" className="cta-btn">まず相談してみる →</a>
         </div>
@@ -50,7 +51,7 @@ export default function LpPage() {
       {/* 共感ゾーン */}
       <div className="section">
         <div className="section-label">こんなお悩みはありませんか</div>
-        <h2>内職管理のよくある困りごと</h2>
+        <h2>外注管理のよくある困りごと</h2>
         <ul className="pain-list">
           <li>月末の集計に毎回時間がかかってしまう</li>
           <li>ExcelやノートがPCにしかなく、その場で確認できない</li>
@@ -68,7 +69,7 @@ export default function LpPage() {
         <div className="section-label">解決策</div>
         <h2>クラウドシステムで解決できます</h2>
         <div className="solution-box">
-          <p>内職ワーカーの管理を、<br />まるごとクラウドにできます</p>
+          <p>外注ワーカーの管理を、<br />まるごとクラウドにできます</p>
         </div>
       </div>
 
@@ -143,7 +144,7 @@ export default function LpPage() {
 
       {/* フッター */}
       <footer style={{ textAlign: 'center', padding: '24px', fontSize: 12, color: '#9ca3af', borderTop: '1px solid #e5e7eb' }}>
-        内職管理システム — お問い合わせはお気軽に
+        Tanomi — 外注管理システム | お問い合わせはお気軽に
       </footer>
 
     </div>
