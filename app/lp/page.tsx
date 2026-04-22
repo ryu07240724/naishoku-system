@@ -20,6 +20,8 @@ export default function LpPage() {
         .feature-card .num { font-size: 11px; font-weight: 700; color: #185fa5; letter-spacing: 0.08em; margin-bottom: 8px; }
         .feature-card h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
         .feature-card p { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
+        .screen-shot { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 24px rgba(0,0,0,0.08); margin: 32px 0; }
+        .screen-caption { text-align: center; font-size: 13px; color: #6b7280; margin-top: -20px; margin-bottom: 32px; }
         .price-box { background: #f9fafb; border-radius: 12px; padding: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
         .price-box h3 { font-size: 17px; font-weight: 600; margin: 0 0 8px; }
         .price-box .note { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
@@ -39,7 +41,7 @@ export default function LpPage() {
       {/* ヒーロー */}
       <div className="hero">
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', color: '#185fa5', marginBottom: 16 }}>Tanomi</div>
+          <img src="/tanomi-logo.svg" alt="Tanomi" style={{ height: 60, marginBottom: 24 }} />
           <h1>Excelと紙の外注管理、<br />月末に憂鬱になっていませんか</h1>
           <p>ワーカーの記録・集計・支払いが、<br />スマホ1台でできるようになります</p>
           <a href="#contact" className="cta-btn">まず相談してみる →</a>
@@ -111,6 +113,14 @@ export default function LpPage() {
             <p>インストール不要。PC・スマホどちらからでもアクセス可能</p>
           </div>
         </div>
+
+        {/* ダッシュボードのスクショ */}
+        <img src="/dashboard.png" alt="管理画面イメージ" className="screen-shot" />
+        <p className="screen-caption">▲ ダッシュボード画面。ワーカー数・案件数・支払い状況を一目で確認できます</p>
+
+        {/* 支払明細書のスクショ */}
+        <img src="/slip.png" alt="支払明細書イメージ" className="screen-shot" />
+        <p className="screen-caption">▲ 支払明細書もワンクリックで発行。印刷・PDF保存に対応しています</p>
       </div>
 
       <hr className="divider" />
