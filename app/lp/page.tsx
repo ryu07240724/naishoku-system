@@ -4,19 +4,42 @@ export default function LpPage() {
   return (
     <div style={{ fontFamily: 'sans-serif', color: '#111827', backgroundColor: 'white', minHeight: '100vh' }}>
       <style>{`
-        .hero { background: #f0f7ff; padding: 64px 24px; text-align: center; }
-        .hero h1 { font-size: 28px; font-weight: 700; line-height: 1.5; margin: 0 0 16px; color: #0c447c; }
-        .hero p { font-size: 16px; color: #374151; margin: 0 0 32px; line-height: 1.8; }
+        .hero {
+          position: relative;
+          padding: 80px 24px;
+          text-align: center;
+          overflow: hidden;
+          min-height: 480px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .hero-bg {
+          position: absolute;
+          inset: 0;
+          background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1400&q=80');
+          background-size: cover;
+          background-position: center;
+          filter: brightness(0.35);
+          z-index: 0;
+        }
+        .hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+        .hero h1 { font-size: 28px; font-weight: 700; line-height: 1.5; margin: 0 0 16px; color: #fff; }
+        .hero p { font-size: 16px; color: rgba(255,255,255,0.85); margin: 0 0 32px; line-height: 1.8; }
         .cta-btn { display: inline-block; background: #185fa5; color: white; padding: 14px 36px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; }
         .section { max-width: 720px; margin: 0 auto; padding: 56px 24px; }
         .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #185fa5; margin-bottom: 12px; }
         .section h2 { font-size: 22px; font-weight: 600; margin: 0 0 32px; }
-        .pain-list { list-style: none; padding: 0; margin: 0; }
+        .pain-list { list-style: none; padding: 0; margin: 0 0 32px; }
         .pain-list li { padding: 16px 20px; border-left: 3px solid #185fa5; background: #f9fafb; margin-bottom: 12px; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.6; }
+        .pain-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+        .pain-imgs img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; opacity: 0.85; }
         .solution-box { background: #e6f1fb; border-radius: 16px; padding: 32px; text-align: center; }
         .solution-box p { font-size: 18px; font-weight: 600; color: #0c447c; margin: 0; line-height: 1.7; }
         .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .feature-card { background: #f9fafb; border-radius: 12px; padding: 20px; }
+        .feature-card { background: #f9fafb; border-radius: 12px; overflow: hidden; }
+        .feature-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
+        .feature-card-body { padding: 16px 20px 20px; }
         .feature-card .num { font-size: 11px; font-weight: 700; color: #185fa5; letter-spacing: 0.08em; margin-bottom: 8px; }
         .feature-card h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
         .feature-card p { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
@@ -35,13 +58,14 @@ export default function LpPage() {
           .hero h1 { font-size: 22px; }
           .feature-grid { grid-template-columns: 1fr; }
           .price-box { flex-direction: column; }
+          .pain-imgs { grid-template-columns: 1fr; }
         }
       `}</style>
 
       {/* ヒーロー */}
       <div className="hero">
-        <div style={{ maxWidth: 640, margin: '0 auto' }}>
-          <img src="/tanomi-logo.svg" alt="Tanomi" style={{ height: 60, marginBottom: 24 }} />
+        <div className="hero-bg" />
+        <div className="hero-inner">
           <h1>Excelと紙の外注管理、<br />月末に憂鬱になっていませんか</h1>
           <p>ワーカーの記録・集計・支払いが、<br />スマホ1台でできるようになります</p>
           <a href="#contact" className="cta-btn">まず相談してみる →</a>
@@ -62,6 +86,10 @@ export default function LpPage() {
           <li>支払い漏れが怖くて何度も見直している</li>
           <li>データが増えるほど管理が煩雑になってきた</li>
         </ul>
+        <div className="pain-imgs">
+          <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=700&q=80" alt="書類作業の様子" />
+          <img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?w=700&q=80" alt="Excelでの管理" />
+        </div>
       </div>
 
       <hr className="divider" />
@@ -82,43 +110,28 @@ export default function LpPage() {
         <div className="section-label">機能</div>
         <h2>できること</h2>
         <div className="feature-grid">
-          <div className="feature-card">
-            <div className="num">01</div>
-            <h3>ワーカー管理</h3>
-            <p>稼働中・停止中の切り替えや連絡先をまとめて管理できます</p>
-          </div>
-          <div className="feature-card">
-            <div className="num">02</div>
-            <h3>実績登録（スマホ対応）</h3>
-            <p>スマホからその場で入力。後でまとめる手間がなくなります</p>
-          </div>
-          <div className="feature-card">
-            <div className="num">03</div>
-            <h3>報酬自動計算</h3>
-            <p>個数と単価を入れるだけで報酬が自動で出ます。手計算ゼロ</p>
-          </div>
-          <div className="feature-card">
-            <div className="num">04</div>
-            <h3>支払い管理</h3>
-            <p>未払い残高をリアルタイムで確認。支払い漏れを防ぎます</p>
-          </div>
-          <div className="feature-card">
-            <div className="num">05</div>
-            <h3>CSV出力</h3>
-            <p>期間・ワーカー別に集計してCSV出力。経理処理にそのまま使えます</p>
-          </div>
-          <div className="feature-card">
-            <div className="num">06</div>
-            <h3>クラウド管理</h3>
-            <p>インストール不要。PC・スマホどちらからでもアクセス可能</p>
-          </div>
+          {[
+            { num: '01', title: 'ワーカー管理', desc: '稼働中・停止中の切り替えや連絡先をまとめて管理できます', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80' },
+            { num: '02', title: '実績登録（スマホ対応）', desc: 'スマホからその場で入力。後でまとめる手間がなくなります', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80' },
+            { num: '03', title: '報酬自動計算', desc: '個数と単価を入れるだけで報酬が自動で出ます。手計算ゼロ', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80' },
+            { num: '04', title: '支払い管理', desc: '未払い残高をリアルタイムで確認。支払い漏れを防ぎます', img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80' },
+            { num: '05', title: 'CSV出力', desc: '期間・ワーカー別に集計してCSV出力。経理処理にそのまま使えます', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' },
+            { num: '06', title: 'クラウド管理', desc: 'インストール不要。PC・スマホどちらからでもアクセス可能', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80' },
+          ].map((f) => (
+            <div className="feature-card" key={f.num}>
+              <img src={f.img} alt={f.title} />
+              <div className="feature-card-body">
+                <div className="num">{f.num}</div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* ダッシュボードのスクショ */}
         <img src="/dashboard.png" alt="管理画面イメージ" className="screen-shot" />
         <p className="screen-caption">▲ ダッシュボード画面。ワーカー数・案件数・支払い状況を一目で確認できます</p>
 
-        {/* 支払明細書のスクショ */}
         <img src="/slip.png" alt="支払明細書イメージ" className="screen-shot" />
         <p className="screen-caption">▲ 支払明細書もワンクリックで発行。印刷・PDF保存に対応しています</p>
       </div>
@@ -152,7 +165,6 @@ export default function LpPage() {
         </div>
       </div>
 
-      {/* フッター */}
       <footer style={{ textAlign: 'center', padding: '24px', fontSize: 12, color: '#9ca3af', borderTop: '1px solid #e5e7eb' }}>
         Tanomi — 外注管理システム | お問い合わせはお気軽に
       </footer>
