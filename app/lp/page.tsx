@@ -66,6 +66,7 @@ export default function LpPage() {
       <div className="hero">
         <div className="hero-bg" />
         <div className="hero-inner">
+          <img src="/tanomi-logo.svg" alt="Tanomi" style={{ height: 60, marginBottom: 24 }} />
           <h1>Excelと紙の外注管理、<br />月末に憂鬱になっていませんか</h1>
           <p>ワーカーの記録・集計・支払いが、<br />スマホ1台でできるようになります</p>
           <a href="#contact" className="cta-btn">まず相談してみる →</a>
@@ -88,7 +89,7 @@ export default function LpPage() {
         </ul>
         <div className="pain-imgs">
           <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=700&q=80" alt="書類作業の様子" />
-          <img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?w=700&q=80" alt="Excelでの管理" />
+          <img src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=700&q=80" alt="金額が載ったノート" />
         </div>
       </div>
 
@@ -114,9 +115,9 @@ export default function LpPage() {
             { num: '01', title: 'ワーカー管理', desc: '稼働中・停止中の切り替えや連絡先をまとめて管理できます', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80' },
             { num: '02', title: '実績登録（スマホ対応）', desc: 'スマホからその場で入力。後でまとめる手間がなくなります', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80' },
             { num: '03', title: '報酬自動計算', desc: '個数と単価を入れるだけで報酬が自動で出ます。手計算ゼロ', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80' },
-            { num: '04', title: '支払い管理', desc: '未払い残高をリアルタイムで確認。支払い漏れを防ぎます', img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80' },
-            { num: '05', title: 'CSV出力', desc: '期間・ワーカー別に集計してCSV出力。経理処理にそのまま使えます', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' },
-            { num: '06', title: 'クラウド管理', desc: 'インストール不要。PC・スマホどちらからでもアクセス可能', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80' },
+            { num: '04', title: '支払い管理', desc: '未払い残高をリアルタイムで確認。支払い漏れを防ぎます', img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80' },
+            { num: '05', title: 'CSV出力', desc: '期間・ワーカー別に集計してCSV出力。経理処理にそのまま使えます', img: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80' },
+            { num: '06', title: 'クラウド管理', desc: 'インストール不要。PC・スマホどちらからでもアクセス可能', img: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&q=80' },
           ].map((f) => (
             <div className="feature-card" key={f.num}>
               <img src={f.img} alt={f.title} />
