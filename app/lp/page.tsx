@@ -14,7 +14,7 @@ export default function LpPage() {
         .hero h1 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; line-height: 1.6; margin: 0 0 16px; color: #0c447c; }
         .hero p { font-size: 15px; color: #374151; margin: 0 0 32px; line-height: 1.8; }
         .cta-btn { display: inline-block; background: #185fa5; color: white; padding: 14px 36px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; }
-        .wrap { max-width: 680px; margin: 0 auto; padding: 56px 24px; }
+        .wrap { max-width: 560px; margin: 0 auto; padding: 56px 24px; }
         .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #185fa5; margin-bottom: 12px; }
         .section-title { font-size: clamp(18px, 3vw, 22px); font-weight: 600; margin: 0 0 32px; }
         .pain-list { list-style: none; padding: 0; margin: 0 0 32px; }
