@@ -4,49 +4,36 @@ export default function LpPage() {
   return (
     <div style={{ fontFamily: 'sans-serif', color: '#111827', backgroundColor: 'white', minHeight: '100vh' }}>
       <style>{`
+        * { box-sizing: border-box; }
         .hero {
-          position: relative;
-          padding: 80px 24px;
+          background: #f0f7ff;
+          padding: 64px 24px;
           text-align: center;
-          overflow: hidden;
-          min-height: 480px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
-        .hero-bg {
-          position: absolute;
-          inset: 0;
-          background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1400&q=80');
-          background-size: cover;
-          background-position: center;
-          filter: brightness(0.35);
-          z-index: 0;
-        }
-        .hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
-        .hero h1 { font-size: 28px; font-weight: 700; line-height: 1.5; margin: 0 0 16px; color: #fff; }
-        .hero p { font-size: 16px; color: rgba(255,255,255,0.85); margin: 0 0 32px; line-height: 1.8; }
+        .hero-inner { max-width: 600px; margin: 0 auto; }
+        .hero h1 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; line-height: 1.6; margin: 0 0 16px; color: #0c447c; }
+        .hero p { font-size: 15px; color: #374151; margin: 0 0 32px; line-height: 1.8; }
         .cta-btn { display: inline-block; background: #185fa5; color: white; padding: 14px 36px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; }
-        .section { max-width: 720px; margin: 0 auto; padding: 56px 24px; }
+        .wrap { max-width: 680px; margin: 0 auto; padding: 56px 24px; }
         .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #185fa5; margin-bottom: 12px; }
-        .section h2 { font-size: 22px; font-weight: 600; margin: 0 0 32px; }
+        .section-title { font-size: clamp(18px, 3vw, 22px); font-weight: 600; margin: 0 0 32px; }
         .pain-list { list-style: none; padding: 0; margin: 0 0 32px; }
         .pain-list li { padding: 16px 20px; border-left: 3px solid #185fa5; background: #f9fafb; margin-bottom: 12px; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.6; }
-        .pain-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
-        .pain-imgs img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; opacity: 0.85; }
+        .pain-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .pain-imgs img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; opacity: 0.85; }
         .solution-box { background: #e6f1fb; border-radius: 16px; padding: 32px; text-align: center; }
-        .solution-box p { font-size: 18px; font-weight: 600; color: #0c447c; margin: 0; line-height: 1.7; }
+        .solution-box p { font-size: 17px; font-weight: 600; color: #0c447c; margin: 0; line-height: 1.7; }
         .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .feature-card { background: #f9fafb; border-radius: 12px; overflow: hidden; }
-        .feature-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
-        .feature-card-body { padding: 16px 20px 20px; }
-        .feature-card .num { font-size: 11px; font-weight: 700; color: #185fa5; letter-spacing: 0.08em; margin-bottom: 8px; }
-        .feature-card h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
-        .feature-card p { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
-        .screen-shot { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 24px rgba(0,0,0,0.08); margin: 32px 0; }
-        .screen-caption { text-align: center; font-size: 13px; color: #6b7280; margin-top: -20px; margin-bottom: 32px; }
+        .feature-card img { width: 100%; height: 130px; object-fit: cover; display: block; }
+        .feature-card-body { padding: 14px 16px 18px; }
+        .feature-card .num { font-size: 11px; font-weight: 700; color: #185fa5; letter-spacing: 0.08em; margin-bottom: 6px; }
+        .feature-card h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+        .feature-card p { font-size: 12px; color: #6b7280; margin: 0; line-height: 1.6; }
+        .screen-shot { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 24px rgba(0,0,0,0.08); margin: 32px 0 8px; }
+        .screen-caption { text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 32px; }
         .price-box { background: #f9fafb; border-radius: 12px; padding: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
-        .price-box h3 { font-size: 17px; font-weight: 600; margin: 0 0 8px; }
+        .price-box h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; }
         .price-box .note { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
         .price-num { font-size: 26px; font-weight: 600; color: #111827; }
         .price-sub { font-size: 12px; color: #9ca3af; margin-top: 4px; }
@@ -54,19 +41,17 @@ export default function LpPage() {
         .contact-box h2 { font-size: 20px; font-weight: 600; color: #0c447c; margin: 0 0 12px; }
         .contact-box p { font-size: 14px; color: #374151; margin: 0 0 28px; line-height: 1.8; }
         .divider { border: none; border-top: 1px solid #e5e7eb; margin: 0; }
-        @media (max-width: 600px) {
-          .hero h1 { font-size: 22px; }
+        @media (max-width: 560px) {
           .feature-grid { grid-template-columns: 1fr; }
-          .price-box { flex-direction: column; }
           .pain-imgs { grid-template-columns: 1fr; }
+          .price-box { flex-direction: column; }
         }
       `}</style>
 
       {/* ヒーロー */}
       <div className="hero">
-        <div className="hero-bg" />
         <div className="hero-inner">
-          <img src="/tanomi-logo.svg" alt="Tanomi" style={{ height: 60, marginBottom: 24 }} />
+          <img src="/tanomi-logo.svg" alt="Tanomi" style={{ height: 56, marginBottom: 28 }} />
           <h1>Excelと紙の外注管理、<br />月末に憂鬱になっていませんか</h1>
           <p>ワーカーの記録・集計・支払いが、<br />スマホ1台でできるようになります</p>
           <a href="#contact" className="cta-btn">まず相談してみる →</a>
@@ -76,9 +61,9 @@ export default function LpPage() {
       <hr className="divider" />
 
       {/* 共感ゾーン */}
-      <div className="section">
+      <div className="wrap">
         <div className="section-label">こんなお悩みはありませんか</div>
-        <h2>外注管理のよくある困りごと</h2>
+        <h2 className="section-title">外注管理のよくある困りごと</h2>
         <ul className="pain-list">
           <li>月末の集計に毎回時間がかかってしまう</li>
           <li>ExcelやノートがPCにしかなく、その場で確認できない</li>
@@ -96,9 +81,9 @@ export default function LpPage() {
       <hr className="divider" />
 
       {/* 解決策 */}
-      <div className="section">
+      <div className="wrap">
         <div className="section-label">解決策</div>
-        <h2>クラウドシステムで解決できます</h2>
+        <h2 className="section-title">クラウドシステムで解決できます</h2>
         <div className="solution-box">
           <p>外注ワーカーの管理を、<br />まるごとクラウドにできます</p>
         </div>
@@ -107,9 +92,9 @@ export default function LpPage() {
       <hr className="divider" />
 
       {/* 機能 */}
-      <div className="section">
+      <div className="wrap">
         <div className="section-label">機能</div>
-        <h2>できること</h2>
+        <h2 className="section-title">できること</h2>
         <div className="feature-grid">
           {[
             { num: '01', title: 'ワーカー管理', desc: '稼働中・停止中の切り替えや連絡先をまとめて管理できます', img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80' },
@@ -140,9 +125,9 @@ export default function LpPage() {
       <hr className="divider" />
 
       {/* 料金 */}
-      <div className="section">
+      <div className="wrap">
         <div className="section-label">料金</div>
-        <h2>導入費用</h2>
+        <h2 className="section-title">導入費用</h2>
         <div className="price-box">
           <div>
             <h3>初期導入・カスタマイズ</h3>
@@ -158,7 +143,7 @@ export default function LpPage() {
       <hr className="divider" />
 
       {/* CTA */}
-      <div className="section" id="contact">
+      <div className="wrap" id="contact">
         <div className="contact-box">
           <h2>まずは無料でご相談ください</h2>
           <p>現在の管理方法や課題をお聞きして、<br />導入のご提案をいたします。お気軽にどうぞ。</p>
