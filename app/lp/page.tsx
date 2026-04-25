@@ -126,7 +126,7 @@ export default function LpPage() {
             月末の憂鬱が、びっくりするほどなくなります。
           </p>
           <div className="hero-actions">
-            <a href="#contact" className="btn-primary">まず相談してみる →</a>
+            <a href="#contact" className="btn-primary">まず相談してみる</a>
             <a href="#features" className="btn-ghost">機能を見る</a>
           </div>
         </div>
