@@ -18,7 +18,7 @@ export default function LpPage() {
         nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(229,231,235,0.6);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
         .nav-logo{font-size:18px;font-weight:900;color:var(--blue-800);letter-spacing:-0.02em;}
         .nav-cta{background:var(--blue-600);color:white;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;}
-        .hero{min-height:100vh;background:linear-gradient(160deg,#f0f7ff 0%,#e6f1fb 40%,#d4eaf8 100%);display:flex;align-items:center;padding:120px 24px 60px;position:relative;overflow:hidden;}
+        .hero{min-height:100vh;background:linear-gradient(160deg,#f0f7ff 0%,#e6f1fb 40%,#d4eaf8 100%);display:flex;align-items:center;justify-content:center;padding:120px 24px 60px;position:relative;overflow:hidden;}
         .hero::before{content:'';position:absolute;right:-200px;top:-100px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(55,138,221,0.12) 0%,transparent 70%);pointer-events:none;}
         .hero-inner{max-width:560px;z-index:1;position:relative;}
         .badge{display:inline-flex;align-items:center;gap:6px;background:white;border:1px solid var(--blue-100);color:var(--blue-800);font-size:12px;font-weight:700;padding:6px 14px;border-radius:40px;margin-bottom:28px;letter-spacing:0.04em;}
