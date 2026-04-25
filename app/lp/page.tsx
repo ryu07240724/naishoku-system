@@ -129,20 +129,6 @@ export default function LpPage() {
             <a href="#contact" className="btn-primary">まず相談してみる →</a>
             <a href="#features" className="btn-ghost">機能を見る</a>
           </div>
-          <div className="stats-row">
-            <div className="stat-item">
-              <div className="num">80%</div>
-              <div className="lbl">集計工数の削減</div>
-            </div>
-            <div className="stat-item">
-              <div className="num">0円</div>
-              <div className="lbl">支払い漏れ</div>
-            </div>
-            <div className="stat-item">
-              <div className="num">即日</div>
-              <div className="lbl">スマホから入力</div>
-            </div>
-          </div>
         </div>
       </div>
 
