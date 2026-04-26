@@ -420,7 +420,7 @@ export default function LpPage() {
           <div className="price-card">
             <div>
               <div className="price-label">初期導入・カスタマイズ費用</div>
-              <div className="price-amount">100,000<span style={{fontSize:'24px',fontWeight:500,color:'#4a5568'}}>円</span></div>
+              <div className="price-amount">10<span style={{fontSize:'24px',fontWeight:500,color:'#4a5568'}}>万円</span></div>
               <div className="price-sub">買い切り型 ／ 月額費用なし</div>
               <ul className="price-features">
                 <li><span className="check">✓</span>業務フローに合わせたカスタマイズ</li>
