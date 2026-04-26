@@ -415,20 +415,23 @@ export default function LpPage() {
       <section className="price-section">
         <div className="inner">
           <div className="section-eyebrow">料金</div>
-          <h2 className="section-title">導入費用</h2>
-          <p className="section-sub">御社の業務フローに合わせてカスタマイズして納品します。</p>
+          <h2 className="section-title">シンプルな料金体系</h2>
+          <p className="section-sub">月額費用ゼロ。一度の導入で、ずっと使えます。</p>
           <div className="price-card">
             <div>
               <div className="price-label">初期導入・カスタマイズ費用</div>
-              <div className="price-amount">要相談</div>
-              <div className="price-sub">まずは話を聞くだけでも大歓迎です</div>
+              <div className="price-amount">100,000<span style={{fontSize:'24px',fontWeight:500,color:'#4a5568'}}>円</span></div>
+              <div className="price-sub">買い切り型 ／ 月額費用なし</div>
               <ul className="price-features">
                 <li><span className="check">✓</span>業務フローに合わせたカスタマイズ</li>
-                <li><span className="check">✓</span>導入後のサポート対応</li>
                 <li><span className="check">✓</span>スマホ対応・クラウド構築込み</li>
                 <li><span className="check">✓</span>CSVエクスポート・明細書発行機能</li>
                 <li><span className="check">✓</span>無料相談・ヒアリングから対応</li>
               </ul>
+              <div style={{marginTop:'24px',background:'#E1F5EE',borderRadius:'12px',padding:'16px 20px',display:'flex',gap:'10px',alignItems:'flex-start'}}>
+                <span style={{fontSize:'18px'}}>💡</span>
+                <p style={{fontSize:'13px',color:'#0F6E56',lineHeight:'1.7',margin:0}}>月額サブスクなし。一度導入すれば追加費用はかかりません。SaaSと違い、ランニングコストを気にせず使い続けられます。</p>
+              </div>
             </div>
             <div style={{textAlign:'center'}}>
               <div style={{background:'#E6F1FB',borderRadius:'28px',padding:'40px 32px',marginBottom:'16px'}}>
@@ -446,8 +449,8 @@ export default function LpPage() {
       {/* CTA */}
       <section className="cta-section" id="contact">
         <h2>まずは無料でご相談ください</h2>
-        <p>現在の管理方法や課題をお聞きして、<br />最適な導入プランをご提案します。</p>
-        <a href="mailto:ryu07240724@yahoo.co.jp" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する →</a>
+        <p>現在の管理方法や課題をお聞きして、<br />導入支援します。</p>
+        <a href="mailto:ryu07240724@yahoo.co.jp" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する </a>
         <p className="form-note">返信は通常1〜2営業日以内。しつこい営業は一切しません。</p>
       </section>
 
