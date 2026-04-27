@@ -419,11 +419,11 @@ export default function LpPage() {
           <p className="section-sub">月額費用ゼロ。一度の導入で、ずっと使えます。</p>
           <div className="price-card">
             <div>
-              <div className="price-label">初期導入・カスタマイズ費用</div>
+              <div className="price-label">初期導入費用</div>
               <div className="price-amount">10<span style={{fontSize:'24px',fontWeight:500,color:'#4a5568'}}>万円</span></div>
               <div className="price-sub">買い切り型 ／ 月額費用なし</div>
               <ul className="price-features">
-                <li><span className="check">✓</span>業務フローに合わせたカスタマイズ</li>
+                <li><span className="check">✓</span>追加カスタマイズは別途お見積もり</li>
                 <li><span className="check">✓</span>スマホ対応・クラウド構築込み</li>
                 <li><span className="check">✓</span>CSVエクスポート・明細書発行機能</li>
                 <li><span className="check">✓</span>無料相談・ヒアリングから対応</li>
@@ -436,7 +436,7 @@ export default function LpPage() {
             <div style={{textAlign:'center'}}>
               <div style={{background:'#E6F1FB',borderRadius:'28px',padding:'40px 32px',marginBottom:'16px'}}>
                 <div style={{fontSize:'13px',color:'#9ca3af',marginBottom:'12px'}}>まずはここから</div>
-                <a href="#contact" className="btn-primary" style={{display:'inline-flex',fontSize:'15px'}}>無料相談する →</a>
+                <a href="#contact" className="btn-primary" style={{display:'inline-flex',fontSize:'15px'}}>無料相談する</a>
               </div>
               <p style={{fontSize:'12px',color:'#9ca3af'}}>相談・ヒアリングは完全無料</p>
             </div>
