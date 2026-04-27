@@ -114,8 +114,8 @@ export default function LpPage() {
       </nav>
 
       {/* HERO */}
-      <div className="hero">
-        <div className="hero-inner">
+      <div className="hero" style={{justifyContent:'center',gap:'60px',flexWrap:'wrap'}}>
+        <div className="hero-inner" style={{maxWidth:'480px'}}>
           <div className="badge">
             <span className="badge-dot"></span>
             外注管理のDXを、もっとシンプルに
@@ -129,6 +129,105 @@ export default function LpPage() {
             <a href="#contact" className="btn-primary">まず相談してみる</a>
             <a href="#features" className="btn-ghost">機能を見る</a>
           </div>
+        </div>
+
+        {/* デバイスモックアップ */}
+        <div style={{position:'relative',width:'420px',height:'380px',flexShrink:0}}>
+
+          {/* ノートPC */}
+          <div style={{position:'absolute',top:0,left:0,width:'340px'}}>
+            <div style={{background:'#1e293b',borderRadius:'12px 12px 0 0',padding:'8px 12px',display:'flex',alignItems:'center',gap:'6px'}}>
+              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ff6b6b'}}></div>
+              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ffd93d'}}></div>
+              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#6bcb77'}}></div>
+              <div style={{flex:1,background:'#334155',borderRadius:'4px',height:'16px',marginLeft:'8px',display:'flex',alignItems:'center',paddingLeft:'8px'}}>
+                <span style={{fontSize:'9px',color:'#94a3b8'}}>tanomi.app/dashboard</span>
+              </div>
+            </div>
+            <div style={{background:'white',border:'1px solid #e2e8f0',padding:'12px',borderRadius:'0 0 4px 4px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
+                <span style={{fontSize:'11px',fontWeight:700,color:'#042C53'}}>ダッシュボード</span>
+                <span style={{fontSize:'9px',color:'#9ca3af'}}>2025年4月</span>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'6px',marginBottom:'10px'}}>
+                <div style={{background:'#E6F1FB',borderRadius:'6px',padding:'8px'}}>
+                  <div style={{fontSize:'9px',color:'#185FA5',fontWeight:700}}>ワーカー数</div>
+                  <div style={{fontSize:'16px',fontWeight:900,color:'#042C53'}}>12</div>
+                </div>
+                <div style={{background:'#E1F5EE',borderRadius:'6px',padding:'8px'}}>
+                  <div style={{fontSize:'9px',color:'#0F6E56',fontWeight:700}}>支払済み</div>
+                  <div style={{fontSize:'16px',fontWeight:900,color:'#042C53'}}>¥84万</div>
+                </div>
+                <div style={{background:'#fef9c3',borderRadius:'6px',padding:'8px'}}>
+                  <div style={{fontSize:'9px',color:'#a16207',fontWeight:700}}>未払い</div>
+                  <div style={{fontSize:'16px',fontWeight:900,color:'#a16207'}}>¥31万</div>
+                </div>
+              </div>
+              <div style={{background:'#f9fafb',borderRadius:'6px',padding:'8px'}}>
+                <div style={{fontSize:'9px',color:'#6b7280',marginBottom:'6px',fontWeight:600}}>最近の実績</div>
+                {[{name:'田中 優子',num:'84個',amount:'¥71,400'},{name:'鈴木 健太',num:'62個',amount:'¥57,040'},{name:'佐藤 直樹',num:'45個',amount:'¥42,750'}].map((r,i)=>(
+                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 0',borderBottom:i<2?'1px solid #f0f0f0':'none'}}>
+                    <span style={{fontSize:'9px',color:'#374151'}}>{r.name}</span>
+                    <span style={{fontSize:'9px',color:'#6b7280'}}>{r.num}</span>
+                    <span style={{fontSize:'9px',fontWeight:700,color:'#042C53'}}>{r.amount}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{background:'#334155',height:'6px',borderRadius:'0 0 4px 4px',margin:'0 8px'}}></div>
+            <div style={{background:'#475569',height:'3px',borderRadius:'0 0 8px 8px',margin:'0 24px'}}></div>
+          </div>
+
+          {/* タブレット */}
+          <div style={{position:'absolute',bottom:'20px',right:'60px',width:'130px'}}>
+            <div style={{background:'#1e293b',borderRadius:'10px',padding:'6px',boxShadow:'0 8px 24px rgba(0,0,0,0.15)'}}>
+              <div style={{background:'white',borderRadius:'6px',padding:'8px',minHeight:'160px'}}>
+                <div style={{fontSize:'8px',fontWeight:700,color:'#042C53',marginBottom:'6px'}}>支払い状況</div>
+                <div style={{background:'#fef9c3',borderRadius:'4px',padding:'5px',marginBottom:'4px'}}>
+                  <div style={{fontSize:'7px',color:'#a16207',fontWeight:700}}>未払い合計</div>
+                  <div style={{fontSize:'13px',fontWeight:900,color:'#a16207'}}>¥312,400</div>
+                </div>
+                <div style={{background:'#dcfce7',borderRadius:'4px',padding:'5px',marginBottom:'6px'}}>
+                  <div style={{fontSize:'7px',color:'#15803d',fontWeight:700}}>支払済み</div>
+                  <div style={{fontSize:'13px',fontWeight:900,color:'#15803d'}}>¥848,200</div>
+                </div>
+                {[{name:'田中',status:'済',color:'#e0f2fe',tc:'#0369a1'},{name:'鈴木',status:'未',color:'#fef9c3',tc:'#a16207'},{name:'佐藤',status:'未',color:'#fef9c3',tc:'#a16207'}].map((r,i)=>(
+                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderBottom:'1px solid #f0f0f0'}}>
+                    <span style={{fontSize:'8px',color:'#374151'}}>{r.name}</span>
+                    <span style={{fontSize:'7px',background:r.color,color:r.tc,padding:'1px 5px',borderRadius:'10px',fontWeight:700}}>{r.status}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{background:'#334155',width:'30px',height:'3px',borderRadius:'2px',margin:'4px auto 0'}}></div>
+            </div>
+          </div>
+
+          {/* スマホ */}
+          <div style={{position:'absolute',bottom:0,right:0,width:'80px'}}>
+            <div style={{background:'#1e293b',borderRadius:'14px',padding:'5px',boxShadow:'0 8px 24px rgba(0,0,0,0.2)'}}>
+              <div style={{background:'#334155',width:'20px',height:'3px',borderRadius:'2px',margin:'0 auto 4px'}}></div>
+              <div style={{background:'white',borderRadius:'8px',padding:'6px',minHeight:'140px'}}>
+                <div style={{fontSize:'7px',fontWeight:700,color:'#042C53',marginBottom:'6px'}}>実績を登録</div>
+                <div style={{marginBottom:'4px'}}>
+                  <div style={{fontSize:'6px',color:'#9ca3af',marginBottom:'2px'}}>ワーカー</div>
+                  <div style={{border:'1px solid #e5e7eb',borderRadius:'3px',padding:'3px 5px',fontSize:'7px',color:'#374151'}}>田中 優子</div>
+                </div>
+                <div style={{marginBottom:'4px'}}>
+                  <div style={{fontSize:'6px',color:'#9ca3af',marginBottom:'2px'}}>個数</div>
+                  <div style={{border:'1px solid #e5e7eb',borderRadius:'3px',padding:'3px 5px',fontSize:'7px',color:'#374151'}}>84</div>
+                </div>
+                <div style={{background:'#E6F1FB',borderRadius:'3px',padding:'4px',marginBottom:'5px'}}>
+                  <div style={{fontSize:'6px',color:'#4a5568'}}>自動計算</div>
+                  <div style={{fontSize:'10px',fontWeight:900,color:'#0C447C'}}>¥71,400</div>
+                </div>
+                <div style={{background:'#185FA5',borderRadius:'4px',padding:'4px',textAlign:'center'}}>
+                  <span style={{fontSize:'7px',color:'white',fontWeight:700}}>登録する</span>
+                </div>
+              </div>
+              <div style={{background:'#334155',width:'20px',height:'3px',borderRadius:'2px',margin:'4px auto 0'}}></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
