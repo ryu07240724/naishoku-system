@@ -134,14 +134,19 @@ export default function NewRecordPage() {
       setError('ワーカー・案件・作業日・個数は必須です'); return
     }
     setLoading(true)
-    const { error } = await supabase.from('work_records').insert([{
+    const insertData: any = {
       worker_id: form.worker_id,
       project_id: form.project_id,
       work_date: form.work_date,
       quantity: Number(form.quantity),
       unit_price: unitPrice,
       note: form.note,
-    }])
+    }
+    // 作業予定から選択した場合はschedule_idも保存
+    if (useSchedule === 'select' && selectedScheduleId) {
+      insertData.schedule_id = selectedScheduleId
+    }
+    const { error } = await supabase.from('work_records').insert([insertData])
     if (error) { setError('登録に失敗しました: ' + error.message); setLoading(false); return }
     router.push('/records')
   }
@@ -166,12 +171,7 @@ export default function NewRecordPage() {
           {/* ワーカー */}
           <div>
             <label style={labelStyle}>ワーカー <span style={{ color: 'red' }}>*</span></label>
-            <select
-              name="worker_id"
-              value={form.worker_id}
-              onChange={e => handleWorkerChange(e.target.value)}
-              style={inputStyle}
-            >
+            <select name="worker_id" value={form.worker_id} onChange={e => handleWorkerChange(e.target.value)} style={inputStyle}>
               <option value="">選択してください</option>
               {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
             </select>
@@ -203,8 +203,7 @@ export default function NewRecordPage() {
                   ) : schedules.length === 0 ? (
                     <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '16px', textAlign: 'center', border: '1px solid #e5e7eb' }}>
                       <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 8px' }}>今日以降の作業予定がありません</p>
-                      <button onClick={() => setUseSchedule('manual')}
-                        style={{ fontSize: '13px', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                      <button onClick={() => setUseSchedule('manual')} style={{ fontSize: '13px', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
                         手入力に切り替える
                       </button>
                     </div>
