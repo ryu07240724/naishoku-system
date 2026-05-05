@@ -23,13 +23,31 @@ export default function NewProjectPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // 大項目追加
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [catSaving, setCatSaving] = useState(false)
+
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase.from('project_categories').select('*').order('sort_order').order('created_at')
-      setCategories(data || [])
-    }
-    load()
+    loadCategories()
   }, [])
+
+  const loadCategories = async () => {
+    const { data } = await supabase.from('project_categories').select('*').order('sort_order').order('created_at')
+    setCategories(data || [])
+  }
+
+  const handleAddCategory = async () => {
+    const name = newCategoryName.trim()
+    if (!name) return
+    setCatSaving(true)
+    const { data } = await supabase.from('project_categories').insert({ name, sort_order: categories.length }).select().single()
+    await loadCategories()
+    if (data) setCategoryId(data.id) // 追加した大項目を自動選択
+    setNewCategoryName('')
+    setShowAddCategory(false)
+    setCatSaving(false)
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -83,6 +101,39 @@ export default function NewProjectPage() {
                 <option key={c.id} value={c.id}>📁 {c.name}</option>
               ))}
             </select>
+            {/* 大項目追加ボタン */}
+            {!showAddCategory ? (
+              <button
+                onClick={() => setShowAddCategory(true)}
+                style={{ marginTop: '8px', fontSize: '13px', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+              >
+                ＋ 新しい大項目を追加
+              </button>
+            ) : (
+              <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                <input
+                  value={newCategoryName}
+                  onChange={e => setNewCategoryName(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleAddCategory() }}
+                  placeholder="大項目名を入力"
+                  autoFocus
+                  style={{ flex: 1, padding: '6px 10px', border: '1px solid #8b5cf6', borderRadius: '6px', fontSize: '14px', color: '#111827', background: 'white' }}
+                />
+                <button
+                  onClick={handleAddCategory}
+                  disabled={catSaving || !newCategoryName.trim()}
+                  style={{ padding: '6px 12px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  追加
+                </button>
+                <button
+                  onClick={() => { setShowAddCategory(false); setNewCategoryName('') }}
+                  style={{ padding: '6px 10px', background: '#f3f4f6', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 案件名 */}
