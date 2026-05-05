@@ -60,7 +60,7 @@ export default function DashboardPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', fontFamily: 'sans-serif' }}>
       <header style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1f2937' }}>内職管理システム</h1>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1f2937' }}>外注管理システム</h1>
           <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
             <button
               onClick={() => router.push('/settings')}
