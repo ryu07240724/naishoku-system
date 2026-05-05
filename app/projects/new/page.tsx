@@ -23,7 +23,8 @@ export default function NewProjectPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // 大項目追加
+  // 大項目追加・管理
+  const [showCatManager, setShowCatManager] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
   const [catSaving, setCatSaving] = useState(false)
@@ -43,10 +44,17 @@ export default function NewProjectPage() {
     setCatSaving(true)
     const { data } = await supabase.from('project_categories').insert({ name, sort_order: categories.length }).select().single()
     await loadCategories()
-    if (data) setCategoryId(data.id) // 追加した大項目を自動選択
+    if (data) setCategoryId(data.id)
     setNewCategoryName('')
     setShowAddCategory(false)
     setCatSaving(false)
+  }
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    if (!confirm(`「${name}」を削除しますか？\n※この大項目に属する案件は「未分類」になります。`)) return
+    await supabase.from('project_categories').delete().eq('id', id)
+    if (categoryId === id) setCategoryId('')
+    await loadCategories()
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -101,15 +109,27 @@ export default function NewProjectPage() {
                 <option key={c.id} value={c.id}>📁 {c.name}</option>
               ))}
             </select>
-            {/* 大項目追加ボタン */}
-            {!showAddCategory ? (
+
+            {/* 追加・管理リンク */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
               <button
-                onClick={() => setShowAddCategory(true)}
-                style={{ marginTop: '8px', fontSize: '13px', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                onClick={() => { setShowAddCategory(v => !v); setNewCategoryName('') }}
+                style={{ fontSize: '13px', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
               >
                 ＋ 新しい大項目を追加
               </button>
-            ) : (
+              {categories.length > 0 && (
+                <button
+                  onClick={() => setShowCatManager(v => !v)}
+                  style={{ fontSize: '13px', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  {showCatManager ? '▲ 一覧を閉じる' : '▼ 大項目を管理'}
+                </button>
+              )}
+            </div>
+
+            {/* 追加フォーム */}
+            {showAddCategory && (
               <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                 <input
                   value={newCategoryName}
@@ -132,6 +152,23 @@ export default function NewProjectPage() {
                 >
                   ✕
                 </button>
+              </div>
+            )}
+
+            {/* 大項目一覧（削除） */}
+            {showCatManager && (
+              <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {categories.map(c => (
+                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px' }}>
+                    <span style={{ fontSize: '14px', color: '#111827' }}>📁 {c.name}</span>
+                    <button
+                      onClick={() => handleDeleteCategory(c.id, c.name)}
+                      style={{ padding: '3px 10px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '5px', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      削除
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
