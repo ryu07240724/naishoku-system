@@ -538,12 +538,12 @@ export default function LpPage() {
       <section className="cta-section" id="contact">
         <h2>まずは無料でご相談ください</h2>
         <p>現在の管理方法や課題をお聞きして、<br />導入支援します。</p>
-        <a href="mailto:ryu07240724@yahoo.co.jp" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する</a>
+        <a href="mailto:tanomi.info@gmail.com" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する</a>
         <p className="form-note">返信は通常1〜2営業日以内。しつこい営業は一切しません。</p>
       </section>
 
       <footer style={{background:'#042C53',padding:'40px 24px',textAlign:'center',borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-        <p style={{fontSize:'13px',color:'rgba(255,255,255,0.3)'}}>Tanomi — 外注管理システム &nbsp;|&nbsp; ryu07240724@yahoo.co.jp</p>
+      <p style={{fontSize:'13px',color:'rgba(255,255,255,0.3)'}}>Tanomi — 外注管理システム &nbsp;|&nbsp; tanomi.info@gmail.com</p>
       </footer>
 
     </div>
