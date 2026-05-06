@@ -84,15 +84,6 @@ export default function LpPage() {
         .price-features{list-style:none;margin-top:32px;display:flex;flex-direction:column;gap:10px;}
         .price-features li{display:flex;gap:10px;font-size:14px;color:var(--text-secondary);}
         .check{width:18px;height:18px;border-radius:50%;background:var(--teal-50);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--teal-600);margin-top:2px;}
-        .voice-section{background:white;}
-        .voice-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
-        .voice-card{background:var(--blue-50);border-radius:12px;padding:28px;}
-        .voice-quote{font-size:13px;line-height:1.9;color:var(--text-secondary);margin-bottom:20px;}
-        .voice-author{display:flex;align-items:center;gap:10px;}
-        .voice-avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-200);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--blue-800);flex-shrink:0;}
-        .voice-name{font-size:13px;font-weight:700;color:var(--text-primary);}
-        .voice-role{font-size:11px;color:var(--text-muted);}
-        .voice-stars{color:#f59e0b;font-size:12px;margin-bottom:12px;}
         .cta-section{background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-800) 100%);padding:96px 24px;text-align:center;}
         .cta-section h2{font-size:clamp(24px,4vw,36px);font-weight:900;color:white;margin-bottom:16px;letter-spacing:-0.02em;}
         .cta-section p{font-size:16px;color:rgba(255,255,255,0.7);margin-bottom:40px;line-height:1.8;}
@@ -100,7 +91,8 @@ export default function LpPage() {
         .section-divider{height:1px;background:#f0f0f0;border:none;margin:0;}
         @media(max-width:680px){
           .hero-inner{max-width:100%;}
-          .pain-grid,.sol-cards,.voice-grid{grid-template-columns:1fr;}
+          .hero-mockup{display:none;}
+          .pain-grid,.sol-cards{grid-template-columns:1fr;}
           .feature-item,.feature-item.reverse{grid-template-columns:1fr;direction:ltr;gap:32px;}
           .price-card{grid-template-columns:1fr;gap:32px;}
           .stats-row{gap:24px;}
@@ -132,54 +124,97 @@ export default function LpPage() {
         </div>
 
         {/* デバイスモックアップ */}
-        <div style={{position:'relative',width:'420px',height:'380px',flexShrink:0}}>
+        <div className="hero-mockup" style={{position:'relative',width:'500px',height:'400px',flexShrink:0}}>
 
-          {/* ノートPC */}
-          <div style={{position:'absolute',top:0,left:0,width:'340px'}}>
-            <div style={{background:'#1e293b',borderRadius:'12px 12px 0 0',padding:'8px 12px',display:'flex',alignItems:'center',gap:'6px'}}>
-              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ff6b6b'}}></div>
-              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#ffd93d'}}></div>
-              <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#6bcb77'}}></div>
-              <div style={{flex:1,background:'#334155',borderRadius:'4px',height:'16px',marginLeft:'8px',display:'flex',alignItems:'center',paddingLeft:'8px'}}>
-                <span style={{fontSize:'9px',color:'#94a3b8'}}>tanomi.app/dashboard</span>
-              </div>
-            </div>
-            <div style={{background:'white',border:'1px solid #e2e8f0',padding:'12px',borderRadius:'0 0 4px 4px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
-                <span style={{fontSize:'11px',fontWeight:700,color:'#042C53'}}>ダッシュボード</span>
-                <span style={{fontSize:'9px',color:'#9ca3af'}}>2025年4月</span>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'6px',marginBottom:'10px'}}>
-                <div style={{background:'#E6F1FB',borderRadius:'6px',padding:'8px'}}>
-                  <div style={{fontSize:'9px',color:'#185FA5',fontWeight:700}}>ワーカー数</div>
-                  <div style={{fontSize:'16px',fontWeight:900,color:'#042C53'}}>12</div>
-                </div>
-                <div style={{background:'#E1F5EE',borderRadius:'6px',padding:'8px'}}>
-                  <div style={{fontSize:'9px',color:'#0F6E56',fontWeight:700}}>支払済み</div>
-                  <div style={{fontSize:'16px',fontWeight:900,color:'#042C53'}}>¥84万</div>
-                </div>
-                <div style={{background:'#fef9c3',borderRadius:'6px',padding:'8px'}}>
-                  <div style={{fontSize:'9px',color:'#a16207',fontWeight:700}}>未払い</div>
-                  <div style={{fontSize:'16px',fontWeight:900,color:'#a16207'}}>¥31万</div>
+          {/* ノートPC - メイン */}
+          <div style={{position:'absolute',top:0,left:0,width:'440px',filter:'drop-shadow(0 24px 56px rgba(4,44,83,0.22))'}}>
+            {/* 画面本体 */}
+            <div style={{background:'#1a2535',borderRadius:'14px 14px 0 0',padding:'10px 12px 0',boxShadow:'inset 0 0 0 1px rgba(255,255,255,0.07)'}}>
+              {/* タブバー */}
+              <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'8px'}}>
+                <div style={{width:'9px',height:'9px',borderRadius:'50%',background:'#ff6b6b'}}></div>
+                <div style={{width:'9px',height:'9px',borderRadius:'50%',background:'#ffd93d'}}></div>
+                <div style={{width:'9px',height:'9px',borderRadius:'50%',background:'#6bcb77'}}></div>
+                <div style={{flex:1,background:'#2d3f55',borderRadius:'5px',height:'20px',marginLeft:'10px',display:'flex',alignItems:'center',paddingLeft:'10px',gap:'5px'}}>
+                  <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'rgba(255,255,255,0.12)',flexShrink:0}}></div>
+                  <span style={{fontSize:'9px',color:'#94a3b8',fontFamily:"'DM Sans',sans-serif"}}>naishoku-system.vercel.app/dashboard</span>
                 </div>
               </div>
-              <div style={{background:'#f9fafb',borderRadius:'6px',padding:'8px'}}>
-                <div style={{fontSize:'9px',color:'#6b7280',marginBottom:'6px',fontWeight:600}}>最近の実績</div>
-                {[{name:'田中 優子',num:'84個',amount:'¥71,400'},{name:'鈴木 健太',num:'62個',amount:'¥57,040'},{name:'佐藤 直樹',num:'45個',amount:'¥42,750'}].map((r,i)=>(
-                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 0',borderBottom:i<2?'1px solid #f0f0f0':'none'}}>
-                    <span style={{fontSize:'9px',color:'#374151'}}>{r.name}</span>
-                    <span style={{fontSize:'9px',color:'#6b7280'}}>{r.num}</span>
-                    <span style={{fontSize:'9px',fontWeight:700,color:'#042C53'}}>{r.amount}</span>
+              {/* 画面コンテンツ */}
+              <div style={{background:'#f9fafb',borderRadius:'6px 6px 0 0',padding:'14px'}}>
+                {/* ページヘッダー */}
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'7px'}}>
+                    <div style={{width:'6px',height:'16px',borderRadius:'3px',background:'#185FA5'}}></div>
+                    <span style={{fontSize:'12px',fontWeight:800,color:'#042C53',letterSpacing:'-0.01em'}}>ダッシュボード</span>
                   </div>
-                ))}
+                  <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
+                    <span style={{fontSize:'9px',color:'#9ca3af',background:'white',border:'1px solid #e5e7eb',borderRadius:'4px',padding:'2px 8px'}}>2025年4月</span>
+                    <div style={{background:'#185FA5',borderRadius:'5px',padding:'3px 10px'}}>
+                      <span style={{fontSize:'9px',color:'white',fontWeight:700}}>+ 新規登録</span>
+                    </div>
+                  </div>
+                </div>
+                {/* KPIカード 4列 */}
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:'7px',marginBottom:'12px'}}>
+                  {[
+                    {label:'稼働ワーカー',val:'12名',bg:'#E6F1FB',tc:'#042C53',sc:'#185FA5',icon:'👥'},
+                    {label:'今月実績',val:'¥164万',bg:'#E1F5EE',tc:'#042C53',sc:'#0F6E56',icon:'📊'},
+                    {label:'未払残高',val:'¥31万',bg:'#fef9c3',tc:'#92400e',sc:'#a16207',icon:'⚠️'},
+                    {label:'今月入力',val:'847件',bg:'#ede9fe',tc:'#4c1d95',sc:'#6d28d9',icon:'✏️'},
+                  ].map((kpi,i)=>(
+                    <div key={i} style={{background:kpi.bg,borderRadius:'8px',padding:'9px 10px'}}>
+                      <div style={{fontSize:'7px',color:kpi.sc,fontWeight:700,marginBottom:'3px',display:'flex',alignItems:'center',gap:'3px'}}>
+                        <span>{kpi.icon}</span>{kpi.label}
+                      </div>
+                      <div style={{fontSize:'15px',fontWeight:900,color:kpi.tc,fontFamily:"'DM Sans',sans-serif",lineHeight:1}}>{kpi.val}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* テーブル */}
+                <div style={{background:'white',borderRadius:'8px',border:'1px solid #f0f0f0',overflow:'hidden'}}>
+                  <div style={{padding:'7px 12px',borderBottom:'1px solid #f5f5f5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'white'}}>
+                    <span style={{fontSize:'10px',fontWeight:700,color:'#374151'}}>最近の作業実績</span>
+                    <span style={{fontSize:'9px',color:'#185FA5',fontWeight:600}}>すべて見る →</span>
+                  </div>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'9px'}}>
+                    <thead>
+                      <tr style={{background:'#f9fafb'}}>
+                        {['ワーカー','案件','個数','金額','状態'].map(h=>(
+                          <th key={h} style={{padding:'5px 10px',textAlign:'left',fontWeight:600,color:'#9ca3af',borderBottom:'1px solid #f0f0f0',whiteSpace:'nowrap'}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        {name:'田中 優子',proj:'部品A組立',num:'342個',amt:'¥290,700',status:'支払済',sc:'#dcfce7',tc:'#15803d'},
+                        {name:'鈴木 健太',proj:'梱包作業',num:'218個',amt:'¥200,560',status:'未払い',sc:'#fef9c3',tc:'#a16207'},
+                        {name:'佐藤 直樹',proj:'検品',num:'156個',amt:'¥148,200',status:'未払い',sc:'#fef9c3',tc:'#a16207'},
+                        {name:'山本 花',proj:'部品A組立',num:'203個',amt:'¥162,400',status:'支払済',sc:'#dcfce7',tc:'#15803d'},
+                      ].map((r,i,arr)=>(
+                        <tr key={i} style={{borderBottom:i<arr.length-1?'1px solid #f8f8f8':'none'}}>
+                          <td style={{padding:'6px 10px',fontWeight:600,color:'#111827',whiteSpace:'nowrap'}}>{r.name}</td>
+                          <td style={{padding:'6px 10px',color:'#6b7280'}}>{r.proj}</td>
+                          <td style={{padding:'6px 10px',color:'#374151'}}>{r.num}</td>
+                          <td style={{padding:'6px 10px',fontWeight:700,color:'#042C53'}}>{r.amt}</td>
+                          <td style={{padding:'6px 10px'}}>
+                            <span style={{background:r.sc,color:r.tc,padding:'2px 8px',borderRadius:'20px',fontWeight:700,fontSize:'8px',whiteSpace:'nowrap'}}>{r.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            <div style={{background:'#334155',height:'6px',borderRadius:'0 0 4px 4px',margin:'0 8px'}}></div>
-            <div style={{background:'#475569',height:'3px',borderRadius:'0 0 8px 8px',margin:'0 24px'}}></div>
+            {/* ヒンジ部分 */}
+            <div style={{background:'linear-gradient(to bottom,#2d3f55,#1a2a3a)',height:'8px',margin:'0 3px',borderRadius:'0 0 2px 2px'}}></div>
+            <div style={{background:'linear-gradient(to bottom,#e2e8f0,#cbd5e1)',height:'5px',borderRadius:'0 0 8px 8px',margin:'0 0'}}></div>
+            <div style={{background:'#b8c5d6',height:'2px',borderRadius:'0 0 10px 10px',margin:'0 20px'}}></div>
           </div>
 
           {/* タブレット */}
-          <div style={{position:'absolute',bottom:'20px',right:'60px',width:'130px'}}>
+          <div style={{position:'absolute',bottom:'20px',right:'50px',width:'130px'}}>
             <div style={{background:'#1e293b',borderRadius:'10px',padding:'6px',boxShadow:'0 8px 24px rgba(0,0,0,0.15)'}}>
               <div style={{background:'white',borderRadius:'6px',padding:'8px',minHeight:'160px'}}>
                 <div style={{fontSize:'8px',fontWeight:700,color:'#042C53',marginBottom:'6px'}}>支払い状況</div>
@@ -464,52 +499,6 @@ export default function LpPage() {
 
       <hr className="section-divider" />
 
-      {/* VOICE */}
-      <section className="voice-section">
-        <div className="inner">
-          <div className="section-eyebrow">お客様の声</div>
-          <h2 className="section-title">導入後の変化</h2>
-          <p className="section-sub">実際にTanomiを導入した方からのフィードバックです。</p>
-          <div className="voice-grid">
-            <div className="voice-card">
-              <div className="voice-stars">★★★★★</div>
-              <p className="voice-quote">「月末の集計作業が半日かかっていたのが、30分以内に終わるようになりました。担当者の負担が激減しています。」</p>
-              <div className="voice-author">
-                <div className="voice-avatar">T</div>
-                <div>
-                  <div className="voice-name">製造業・総務担当</div>
-                  <div className="voice-role">外注ワーカー12名</div>
-                </div>
-              </div>
-            </div>
-            <div className="voice-card">
-              <div className="voice-stars">★★★★★</div>
-              <p className="voice-quote">「スマホから入力できるようになって、紙のメモがなくなりました。現場リーダーも使いやすいと言っています。」</p>
-              <div className="voice-author">
-                <div className="voice-avatar">S</div>
-                <div>
-                  <div className="voice-name">物流・管理担当</div>
-                  <div className="voice-role">外注ワーカー8名</div>
-                </div>
-              </div>
-            </div>
-            <div className="voice-card">
-              <div className="voice-stars">★★★★★</div>
-              <p className="voice-quote">「支払い漏れが怖くてExcelを何度も確認していましたが、もうその心配が完全になくなりました。精神的にとても楽になりました。」</p>
-              <div className="voice-author">
-                <div className="voice-avatar">M</div>
-                <div>
-                  <div className="voice-name">食品加工・経営者</div>
-                  <div className="voice-role">外注ワーカー20名</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr className="section-divider" />
-
       {/* PRICE */}
       <section className="price-section">
         <div className="inner">
@@ -549,7 +538,7 @@ export default function LpPage() {
       <section className="cta-section" id="contact">
         <h2>まずは無料でご相談ください</h2>
         <p>現在の管理方法や課題をお聞きして、<br />導入支援します。</p>
-        <a href="mailto:ryu07240724@yahoo.co.jp" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する </a>
+        <a href="mailto:ryu07240724@yahoo.co.jp" className="btn-primary" style={{fontSize:'16px',padding:'18px 40px'}}>メールで相談する</a>
         <p className="form-note">返信は通常1〜2営業日以内。しつこい営業は一切しません。</p>
       </section>
 
